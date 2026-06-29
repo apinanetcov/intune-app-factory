@@ -1,0 +1,48 @@
+name: Intune App Pipeline
+
+on:
+  push:
+    paths:
+      - 'apps/**'
+      - 'scripts/**'
+
+jobs:
+  package-test-deploy:
+    runs-on: windows-latest
+
+    env:
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      TENANT_ID: ${{ secrets.TENANT_ID }}
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Install required PowerShell modules
+      shell: pwsh
+      run: |
+        Install-Module IntuneWin32App -Force -Scope CurrentUser
+        Install-Module Microsoft.Graph -Force -Scope CurrentUser
+
+    - name: Download IntuneWinAppUtil
+      shell: pwsh
+      run: |
+        Invoke-WebRequest `
+          https://github.com/microsoft/Microsoft-Win32-Content-Prep-Tool/raw/master/IntuneWinAppUtil.exe `
+          -OutFile IntuneWinAppUtil.exe
+
+    - name: Package Chrome
+      shell: pwsh
+      run: |
+        ./scripts/package.ps1 -AppPath ./apps/chrome
+
+    - name: Test Install
+      shell: pwsh
+      run: |
+        ./scripts/test-install.ps1 -AppPath ./apps/chrome
+
+    - name: Deploy to Intune
+      shell: pwsh
+      run: |
+        ./scripts/deploy-intune.ps1 -AppPath ./apps/chrome
