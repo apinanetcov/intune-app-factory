@@ -7,7 +7,10 @@ Import-Module IntuneWin32App
 $app = Get-Content "$AppPath\app.json" | ConvertFrom-Json
 $package = Get-ChildItem "$AppPath\output\*.intunewin"
 
-Connect-MgGraph -Scopes "DeviceManagementApps.ReadWrite.All"
+Connect-MgGraph `
+  -ClientId $env:CLIENT_ID `
+  -TenantId $env:TENANT_ID `
+  -ClientSecret $env:CLIENT_SECRET
 
 New-IntuneWin32App `
     -FilePath $package.FullName `
