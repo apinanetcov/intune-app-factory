@@ -76,3 +76,4 @@ if (Test-Detection) {
 Write-Host "PASS: not detected after uninstall"
 
 Write-Host "ALL TESTS PASSED for $AppName"
+exit 0
