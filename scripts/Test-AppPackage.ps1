@@ -37,11 +37,11 @@ Write-Host "=== UNINSTALL ==="
 if ($appJson.InstallerType -eq "MSI") {
     # Pull product code straight from the MSI so we don't hardcode it
     $windowsInstaller = New-Object -ComObject WindowsInstaller.Installer
-    $msiDb = $windowsInstaller.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $windowsInstaller, @($setupFile, 0))
-    $view = $msiDb.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $msiDb, ("SELECT Value FROM Property WHERE Property = 'ProductCode'"))
-    $view.GetType().InvokeMember("Execute", "InvokeMethod", $null, $view, $null)
-    $record = $view.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $view, $null)
-    $productCode = $record.GetType().InvokeMember("StringData", "GetProperty", $null, $record, 1)
+    $msiDb = $windowsInstaller.GetType().InvokeMember("OpenDatabase", [System.Reflection.BindingFlags]::InvokeMethod, $null, $windowsInstaller, @($setupFile, 0))
+    $view = $msiDb.GetType().InvokeMember("OpenView", [System.Reflection.BindingFlags]::InvokeMethod, $null, $msiDb, ("SELECT Value FROM Property WHERE Property = 'ProductCode'"))
+    $view.GetType().InvokeMember("Execute", [System.Reflection.BindingFlags]::InvokeMethod, $null, $view, $null)
+    $record = $view.GetType().InvokeMember("Fetch", [System.Reflection.BindingFlags]::InvokeMethod, $null, $view, $null)
+    $productCode = $record.GetType().InvokeMember("StringData", [System.Reflection.BindingFlags]::GetProperty, $null, $record, 1)
 
     $proc = Start-Process msiexec.exe -ArgumentList "/x $productCode /qn /norestart" -Wait -PassThru
     if ($proc.ExitCode -notin 0, 3010) {
