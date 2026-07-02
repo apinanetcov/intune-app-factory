@@ -1,0 +1,17 @@
+{
+  "Name": "GoogleChrome",
+  "DisplayName": "Google Chrome",
+  "Publisher": "Google LLC",
+  "Description": "Google Chrome web browser (Enterprise MSI, 64-bit)",
+  "InstallerType": "MSI",
+  "SourceUri": "https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi",
+  "SetupFileName": "GoogleChromeStandaloneEnterprise64.msi",
+  "Architecture": "x64",
+  "MinimumSupportedWindowsRelease": "W10_1809",
+  "Category": "Browsers",
+  "InformationURL": "https://www.google.com/chrome",
+  "PrivacyURL": "https://policies.google.com/privacy",
+  "AssignmentGroupName": "SG-Intune-App-Chrome-Pilot",
+  "InstallExperience": "system",
+  "RestartBehavior": "suppress"
+}

@@ -1,48 +1,82 @@
-name: Intune App Pipeline
+name: Intune App Factory
 
 on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: "App folder name under apps/ (e.g. GoogleChrome)"
+        required: true
+        default: "GoogleChrome"
   push:
+    branches: [main]
     paths:
-      - 'apps/**'
-      - 'scripts/**'
+      - "apps/**"
 
 jobs:
-  package-test-deploy:
-    runs-on: self-hosted
-
-    env:
-      CLIENT_ID: ${{ secrets.CLIENT_ID }}
-      TENANT_ID: ${{ secrets.TENANT_ID }}
-      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-
+  build:
+    name: Build .intunewin package
+    runs-on: windows-latest
+    outputs:
+      app_name: ${{ steps.setvars.outputs.app_name }}
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install required PowerShell modules
-      shell: pwsh
-      run: |
-        Install-Module IntuneWin32App -Force -Scope CurrentUser
-        Install-Module Microsoft.Graph -Force -Scope CurrentUser
+      - name: Determine app name
+        id: setvars
+        shell: pwsh
+        run: |
+          $appName = "${{ github.event.inputs.app_name }}"
+          if ([string]::IsNullOrEmpty($appName)) { $appName = "GoogleChrome" }
+          echo "app_name=$appName" >> $env:GITHUB_OUTPUT
 
-    - name: Download IntuneWinAppUtil
-      shell: pwsh
-      run: |
-        Invoke-WebRequest `
-          https://github.com/microsoft/Microsoft-Win32-Content-Prep-Tool/raw/master/IntuneWinAppUtil.exe `
-          -OutFile IntuneWinAppUtil.exe
+      - name: Build package
+        shell: pwsh
+        run: ./scripts/Build-IntuneWinPackage.ps1 -AppName "${{ steps.setvars.outputs.app_name }}"
 
-    - name: Package Chrome
-      shell: pwsh
-      run: |
-        ./scripts/package.ps1 -AppPath ./apps/chrome
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: intunewin-package-${{ steps.setvars.outputs.app_name }}
+          path: build/${{ steps.setvars.outputs.app_name }}/output/*
+          retention-days: 5
 
-    - name: Test Install
-      shell: pwsh
-      run: |
-        ./scripts/test-install.ps1 -AppPath ./apps/chrome
+  test:
+    name: Test on apptest-win11
+    needs: build
+    runs-on: [self-hosted, windows, intune-test]
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Deploy to Intune
-      shell: pwsh
-      run: |
-        ./scripts/deploy-intune.ps1 -AppPath ./apps/chrome
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: intunewin-package-${{ needs.build.outputs.app_name }}
+          path: artifact
+
+      - name: Run install/uninstall test
+        shell: pwsh
+        run: ./scripts/Test-AppPackage.ps1 -AppName "${{ needs.build.outputs.app_name }}" -ArtifactFolder "artifact"
+
+  publish:
+    name: Publish to Intune
+    needs: [build, test]
+    runs-on: windows-latest
+    environment: production   # manual approval gate configured in repo settings
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: intunewin-package-${{ needs.build.outputs.app_name }}
+          path: artifact
+
+      - name: Publish to Intune
+        shell: pwsh
+        run: |
+          ./scripts/Publish-IntuneApp.ps1 `
+            -AppName "${{ needs.build.outputs.app_name }}" `
+            -ArtifactFolder "artifact" `
+            -TenantId "${{ secrets.AZURE_TENANT_ID }}" `
+            -ClientId "${{ secrets.AZURE_CLIENT_ID }}" `
+            -ClientSecret "${{ secrets.AZURE_CLIENT_SECRET }}"
