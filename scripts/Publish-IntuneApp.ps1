@@ -53,12 +53,8 @@ if ($existing) {
 }
 
 Write-Host "Assigning to group '$($app.AssignmentGroupName)'"
-$group = Get-MSGraphAllPages -Query "https://graph.microsoft.com/v1.0/groups?`$filter=displayName eq '$($app.AssignmentGroupName)'" -ErrorAction SilentlyContinue
-
-# Fallback using Invoke-MSGraphOperation if Get-MSGraphAllPages isn't exposed in your module version
-if (-not $group) {
-    $group = (Invoke-MSGraphOperation -Get -APIVersion "v1.0" -Resource "groups?`$filter=displayName eq '$($app.AssignmentGroupName)'").value
-}
+# Using Invoke-MSGraphOperation if Get-MSGraphAllPages isn't exposed in your module version
+$group = (Invoke-MSGraphOperation -Get -APIVersion "v1.0" -Resource "groups?`$filter=displayName eq '$($app.AssignmentGroupName)'").value
 
 if (-not $group) {
     throw "Assignment group '$($app.AssignmentGroupName)' not found in Entra ID — create it first."
