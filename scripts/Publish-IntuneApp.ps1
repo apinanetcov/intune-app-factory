@@ -17,7 +17,8 @@ $app = Get-Content (Join-Path $ArtifactFolder "app.json") -Raw | ConvertFrom-Jso
 $intuneWinFile = Get-ChildItem -Path $ArtifactFolder -Filter "*.intunewin" | Select-Object -First 1
 
 Write-Host "Connecting to Microsoft Graph..."
-Connect-MSIntuneGraph -TenantID $TenantId -ClientID $ClientId -ClientSecret $ClientSecret
+$clientSecretCredential = ConvertTo-SecureString -String $ClientSecret -AsPlainText -Force
+Connect-MgGraph -TenantId $TenantId -ClientId $ClientId -ClientSecretCredential $clientSecretCredential -NoWelcome -ErrorAction Stop
 
 $metaData = Get-IntuneWin32AppMetaData -FilePath $intuneWinFile.FullName
 
