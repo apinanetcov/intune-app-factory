@@ -65,7 +65,8 @@ Import-Module Microsoft.Graph.Authentication
 Import-Module Microsoft.Graph.Groups
 
 # Authenticate Microsoft Graph using the same credentials
-$clientSecretCredential = ConvertTo-SecureString -String $ClientSecret -AsPlainText -Force
+$clientSecretSecure = ConvertTo-SecureString -String $ClientSecret -AsPlainText -Force
+$clientSecretCredential = New-Object System.Management.Automation.PSCredential($ClientId, $clientSecretSecure)
 Connect-MgGraph -TenantId $TenantId -ClientId $ClientId -ClientSecretCredential $clientSecretCredential -NoWelcome -ErrorAction Stop
 
 $group = Get-MgGroup -Filter "displayName eq '$($app.AssignmentGroupName)'" -ErrorAction SilentlyContinue | Select-Object -First 1
