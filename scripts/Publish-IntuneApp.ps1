@@ -17,8 +17,7 @@ $app = Get-Content (Join-Path $ArtifactFolder "app.json") -Raw | ConvertFrom-Jso
 $intuneWinFile = Get-ChildItem -Path $ArtifactFolder -Filter "*.intunewin" | Select-Object -First 1
 
 Write-Host "Connecting to Microsoft Graph..."
-$clientSecretCredential = ConvertTo-SecureString -String $ClientSecret -AsPlainText -Force
-Connect-MgGraph -TenantId $TenantId -ClientId $ClientId -ClientSecretCredential $clientSecretCredential -NoWelcome -ErrorAction Stop
+Connect-MSIntuneGraph -TenantID $TenantId -ClientID $ClientId -ClientSecret $ClientSecret
 
 $metaData = Get-IntuneWin32AppMetaData -FilePath $intuneWinFile.FullName
 
@@ -66,7 +65,8 @@ Import-Module Microsoft.Graph.Authentication
 Import-Module Microsoft.Graph.Groups
 
 # Authenticate Microsoft Graph using the same credentials
-Connect-MgGraph -TenantId $TenantId -ClientId $ClientId -ClientSecret $ClientSecret -NoWelcome -ErrorAction Stop
+$clientSecretCredential = ConvertTo-SecureString -String $ClientSecret -AsPlainText -Force
+Connect-MgGraph -TenantId $TenantId -ClientId $ClientId -ClientSecretCredential $clientSecretCredential -NoWelcome -ErrorAction Stop
 
 $group = Get-MgGroup -Filter "displayName eq '$($app.AssignmentGroupName)'" -ErrorAction SilentlyContinue | Select-Object -First 1
 
