@@ -53,11 +53,19 @@ if ($existing) {
 }
 
 Write-Host "Assigning to group '$($app.AssignmentGroupName)'"
-# Ensure Microsoft.Graph.Groups module is available
+
+# Ensure Microsoft.Graph modules are available
+if (-not (Get-Module -ListAvailable -Name Microsoft.Graph.Authentication)) {
+    Install-Module -Name Microsoft.Graph.Authentication -Force -AcceptLicense -Scope CurrentUser
+}
 if (-not (Get-Module -ListAvailable -Name Microsoft.Graph.Groups)) {
     Install-Module -Name Microsoft.Graph.Groups -Force -AcceptLicense -Scope CurrentUser
 }
+Import-Module Microsoft.Graph.Authentication
 Import-Module Microsoft.Graph.Groups
+
+# Authenticate Microsoft Graph using the same credentials
+Connect-MgGraph -TenantId $TenantId -ClientId $ClientId -ClientSecret $ClientSecret -NoWelcome -ErrorAction Stop
 
 $group = Get-MgGroup -Filter "displayName eq '$($app.AssignmentGroupName)'" -ErrorAction SilentlyContinue | Select-Object -First 1
 
