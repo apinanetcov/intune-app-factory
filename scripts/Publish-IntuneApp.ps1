@@ -71,6 +71,7 @@ if (-not $group) {
 Write-Host "Found group '$($app.AssignmentGroupName)' (ID: $($group.id))"
 
 Add-IntuneWin32AppAssignmentGroup -ID $win32App.id `
+                                   -Include `
                                    -GroupID $group.id `
                                    -Intent "required" `
                                    -Notification "showAll"
