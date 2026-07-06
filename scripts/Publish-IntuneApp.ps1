@@ -54,13 +54,25 @@ if ($existing) {
 
 Write-Host "Assigning to group '$($app.AssignmentGroupName)'"
 
-# Ensure Microsoft.Graph.Groups module is available
-$group = Invoke-MSGraphRequest `
-    -HttpMethod GET `
-    -Url "https://graph.microsoft.com/v1.0/groups?`$filter=displayName eq '$($app.AssignmentGroupName)'"
+Connect-MgGraph `
+    -TenantId $TenantId `
+    -ClientId $ClientId `
+    -ClientSecret $ClientSecret `
+    -NoWelcome
+
+Write-Host "Graph Context:"
+Get-MgContext
+
+$group = Get-MgGroup `
+    -Filter "displayName eq '$($app.AssignmentGroupName)'"
 
 if (-not $group) {
-    throw "Assignment group '$($app.AssignmentGroupName)' not found in Entra ID - create it first."
+    Write-Host "No matching group found."
+
+    Get-MgGroup -Top 20 |
+        Select-Object DisplayName, Id
+
+    throw "Assignment group '$($app.AssignmentGroupName)' not found."
 }
 
 Write-Host "Found group '$($app.AssignmentGroupName)' (ID: $($group.id))"
