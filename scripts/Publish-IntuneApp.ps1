@@ -53,16 +53,22 @@ if ($existing) {
 }
 
 Write-Host "Assigning to group '$($app.AssignmentGroupName)'"
-# Using Invoke-MSGraphOperation if Get-MSGraphAllPages isn't exposed in your module version
-$group = (Invoke-MSGraphOperation -Get -APIVersion "v1.0" -Resource "groups?`$filter=displayName eq '$($app.AssignmentGroupName)'").value
+# Ensure Microsoft.Graph.Groups module is available
+if (-not (Get-Module -ListAvailable -Name Microsoft.Graph.Groups)) {
+    Install-Module -Name Microsoft.Graph.Groups -Force -AcceptLicense -Scope CurrentUser
+}
+Import-Module Microsoft.Graph.Groups
+
+$group = Get-MgGroup -Filter "displayName eq '$($app.AssignmentGroupName)'" -ErrorAction SilentlyContinue | Select-Object -First 1
 
 if (-not $group) {
-    throw "Assignment group '$($app.AssignmentGroupName)' not found in Entra ID — create it first."
+    throw "Assignment group '$($app.AssignmentGroupName)' not found in Entra ID - create it first."
 }
+
+Write-Host "Found group '$($app.AssignmentGroupName)' (ID: $($group.id))"
 
 Add-IntuneWin32AppAssignmentGroup -ID $win32App.id `
                                    -GroupID $group.id `
                                    -Intent "required" `
                                    -Notification "showAll"
-
 Write-Host "Published '$($app.DisplayName)' (ID: $($win32App.id)) and assigned to $($app.AssignmentGroupName)"
