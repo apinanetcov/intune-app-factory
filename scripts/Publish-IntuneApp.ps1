@@ -54,14 +54,7 @@ if ($existing) {
 
 Write-Host "Assigning to group '$($app.AssignmentGroupName)'"
 
-Connect-MgGraph `
-    -TenantId $TenantId `
-    -ClientId $ClientId `
-    -ClientSecret $ClientSecret `
-    -NoWelcome
-
-Write-Host "Graph Context:"
-Get-MgContext
+Connect-MgGraph -TenantID $TenantId -ClientSecretCredential (New-Object System.Management.Automation.PSCredential("$ClientId", (ConvertTo-SecureString "$ClientSecret" -AsPlainText -Force)))
 
 $group = Get-MgGroup `
     -Filter "displayName eq '$($app.AssignmentGroupName)'"
