@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory)][string]$AppName,
-    [string]$SharePointUser,
-    [string]$SharePointPassword
+    [Parameter(Mandatory)][string]$TenantId,
+    [Parameter(Mandatory)][string]$ClientId,
+    [Parameter(Mandatory)][string]$ClientSecret
 )
 
 $ErrorActionPreference = "Stop"
@@ -22,15 +23,38 @@ New-Item -ItemType Directory -Path $outputFolder -Force | Out-Null
 
 $setupFilePath = Join-Path $sourceFolder $app.SetupFileName
 
-Write-Host "Downloading installer from $($app.SourceUri)"
-#Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing
-# Handle SharePoint authentication if needed
-if ($app.SourceUri -match "sharepoint.com" -and $SharePointUser -and $SharePointPassword) {
-    Write-Host "Using SharePoint authentication..."
-    $credential = New-Object System.Management.Automation.PSCredential("$SharePointUser", (ConvertTo-SecureString "$SharePointPassword" -AsPlainText -Force))
-    Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing -Credential $credential
-} else {
+
+if (-not (Get-Module -ListAvailable -Name PnP.PowerShell)) {
+    Install-Module PnP.PowerShell -Force -Scope CurrentUser
+}
+
+Import-Module PnP.PowerShel
+
+if ($app.SourceUri -match "sharepoint.com") {
+
+    Write-Host "Downloading installer from SharePoint using App Registration..."
+
+    Connect-PnPOnline `
+        -Url "https://1svh3d.sharepoint.com/sites/Intune-App-Factory" `
+        -ClientId $ClientId `
+        -ClientSecret $ClientSecret `
+        -Tenant $TenantId
+
+    $sharePointFileUrl = "/sites/Intune-App-Factory/Shared Documents/Intune-App-Factory Installers/$($app.SetupFileName)"
+
+    Get-PnPFile `
+        -Url $sharePointFileUrl `
+        -Path $sourceFolder `
+        -FileName $app.SetupFileName `
+        -AsFile `
+        -Force
+
+}
+else {
+
+    Write-Host "Downloading installer from external URL..."
     Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing
+
 }
 
 Write-Host "Installing IntuneWin32App module (if needed)"

@@ -4,7 +4,7 @@
   "Publisher": "Egnyte",
   "Description": "Egnyte Desktop application for file sync and sharing.",
   "InstallerType": "MSI",
-  "SourceUri": "https://1svh3d.sharepoint.com/:u:/s/Intune-App-Factory/IQCN6cm6MpdiT5BA6oyaVyjvAaLS__zVtrBdyyd1h_nmQ24?e=UNFbxU",
+  "SourceUri": "https://1svh3d.sharepoint.com/sites/Intune-App-Factory",
   "SetupFileName": "EgnyteDesktopApp_4.4.1_198 (1).msi",
   "Architecture": "x64",
   "MinimumSupportedWindowsRelease": "W10_1809",
