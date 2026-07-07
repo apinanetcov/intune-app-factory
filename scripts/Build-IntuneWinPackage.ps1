@@ -27,7 +27,7 @@ Write-Host "Downloading installer from $($app.SourceUri)"
 # Handle SharePoint authentication if needed
 if ($app.SourceUri -match "sharepoint.com" -and $SharePointUser -and $SharePointPassword) {
     Write-Host "Using SharePoint authentication..."
-    $credential = New-Object System.Management.Automation.PSCredential($SharePointUser, $SharePointPassword)
+    $credential = New-Object System.Management.Automation.PSCredential("$SharePointUser", (ConvertTo-SecureString "$SharePointPassword" -AsPlainText -Force))
     Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing -Credential $credential
 } else {
     Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing
