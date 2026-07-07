@@ -1,0 +1,17 @@
+{
+  "Name": "Egnyte",
+  "DisplayName": "Egnyte Desktop App",
+  "Publisher": "Egnyte",
+  "Description": "Egnyte Desktop application for file sync and sharing",
+  "InstallerType": "MSI",
+  "SourceUri": "https://1svh3d.sharepoint.com/:u:/s/Intune-App-Factory/IQD9fdPTpxWRR71fh5O-hf-PAWxY6zRC-Eq3gq8fcx0_qqA?e=TfAtbK",
+  "SetupFileName": "EgnyteDesktopApp_4.4.1_198.msi",
+  "Architecture": "x64",
+  "MinimumSupportedWindowsRelease": "W10_1809",
+  "Category": "Productivity",
+  "InformationURL": "https://www.egnyte.com",
+  "PrivacyURL": "https://www.egnyte.com/privacy",
+  "AssignmentGroupName": "SG-Intune-App-Egnyte-Pilot",
+  "InstallExperience": "system",
+  "RestartBehavior": "suppress"
+}
