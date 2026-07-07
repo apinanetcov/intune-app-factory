@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory)][string]$AppName,
     [string]$SharePointUser,
-    [SecureString]$SharePointPassword
+    [string]$SharePointPassword
 )
 
 $ErrorActionPreference = "Stop"
