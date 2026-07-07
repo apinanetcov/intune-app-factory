@@ -23,30 +23,33 @@ jobs:
 
       - name: Determine app name
         id: setvars
-        shell: pwsh
-        run: |
-          $appName = "${{ github.event.inputs.app_name }}"
-          
-          # If triggered by push (not workflow_dispatch), detect changed app folder
-          if ([string]::IsNullOrEmpty($appName)) {
-            $changedFiles = @("${{ github.event.head_commit.modified }}" -split ',')
-            $appFolders = @()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const appName = "${{ github.event.inputs.app_name }}";
             
-            foreach ($file in $changedFiles) {
-              if ($file -match "^apps/([^/]+)/") {
-                $appFolders += $matches[1]
+            if (!appName) {
+              const { data: commits } = await github.rest.repos.compareCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: context.payload.pull_request?.base.sha || '${{ github.event.before }}',
+                head: context.payload.pull_request?.head.sha || '${{ github.sha }}'
+              });
+              
+              const changedFiles = commits.flatMap(c => c.files.map(f => f.filename));
+              const appJsonMatch = changedFiles.find(f => f.match(/^apps\/([^/]+)\/app\.json$/));
+              
+              if (appJsonMatch) {
+                const detected = appJsonMatch.match(/^apps\/([^/]+)\/app\.json$/)[1];
+                core.setOutput("app_name", detected);
+                console.log(`Deploying app: ${detected}`);
+              } else {
+                core.setFailed("No app.json file was added or edited. Workflow will not proceed.");
               }
-            }
-            
-            if ($appFolders.Count -gt 0) {
-              $appName = $appFolders[0]  # Use first changed app
             } else {
-              $appName = "GoogleChrome"  # Fallback default
+              core.setOutput("app_name", appName);
+              console.log(`Deploying app: ${appName}`);
             }
-          }
-          
-          Write-Host "Deploying app: $appName"
-          echo "app_name=$appName" >> $env:GITHUB_OUTPUT
 
       - name: Build package
         shell: pwsh
@@ -101,6 +104,4 @@ jobs:
             -ArtifactFolder "artifact" `
             -TenantId "${{ secrets.AZURE_TENANT_ID }}" `
             -ClientId "${{ secrets.AZURE_CLIENT_ID }}" `
-            -ClientSecret "${{ secrets.AZURE_CLIENT_SECRET }}" `
-            -SharePointUser "${{ secrets.SHAREPOINT_USER }}" `
-            -SharePointPassword "${{ secrets.SHAREPOINT_PASSWORD }}"
+            -ClientSecret "${{ secrets.AZURE_CLIENT_SECRET }}"
