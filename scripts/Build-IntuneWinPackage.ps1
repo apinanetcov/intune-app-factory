@@ -1,5 +1,7 @@
 param(
-    [Parameter(Mandatory)][string]$AppName
+    [Parameter(Mandatory)][string]$AppName,
+    [string]$SharePointUser,
+    [SecureString]$SharePointPassword
 )
 
 $ErrorActionPreference = "Stop"
@@ -21,7 +23,15 @@ New-Item -ItemType Directory -Path $outputFolder -Force | Out-Null
 $setupFilePath = Join-Path $sourceFolder $app.SetupFileName
 
 Write-Host "Downloading installer from $($app.SourceUri)"
-Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing
+#Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing
+# Handle SharePoint authentication if needed
+if ($app.SourceUri -match "sharepoint.com" -and $SharePointUser -and $SharePointPassword) {
+    Write-Host "Using SharePoint authentication..."
+    $credential = New-Object System.Management.Automation.PSCredential($SharePointUser, $SharePointPassword)
+    Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing -Credential $credential
+} else {
+    Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing
+}
 
 Write-Host "Installing IntuneWin32App module (if needed)"
 if (-not (Get-Module -ListAvailable -Name IntuneWin32App)) {

@@ -79,4 +79,6 @@ jobs:
             -ArtifactFolder "artifact" `
             -TenantId "${{ secrets.AZURE_TENANT_ID }}" `
             -ClientId "${{ secrets.AZURE_CLIENT_ID }}" `
-            -ClientSecret "${{ secrets.AZURE_CLIENT_SECRET }}"
+            -ClientSecret "${{ secrets.AZURE_CLIENT_SECRET }}" `
+            -SharePointUser "${{ secrets.SHAREPOINT_USER }}" `
+            -SharePointPassword "${{ secrets.SHAREPOINT_PASSWORD }}"
