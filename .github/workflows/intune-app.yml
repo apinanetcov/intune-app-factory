@@ -26,12 +26,34 @@ jobs:
         shell: pwsh
         run: |
           $appName = "${{ github.event.inputs.app_name }}"
-          if ([string]::IsNullOrEmpty($appName)) { $appName = "GoogleChrome" }
+          
+          # If triggered by push (not workflow_dispatch), detect changed app folder
+          if ([string]::IsNullOrEmpty($appName)) {
+            $changedFiles = @("${{ github.event.head_commit.modified }}" -split ',')
+            $appFolders = @()
+            
+            foreach ($file in $changedFiles) {
+              if ($file -match "^apps/([^/]+)/") {
+                $appFolders += $matches[1]
+              }
+            }
+            
+            if ($appFolders.Count -gt 0) {
+              $appName = $appFolders[0]  # Use first changed app
+            } else {
+              $appName = "GoogleChrome"  # Fallback default
+            }
+          }
+          
+          Write-Host "Deploying app: $appName"
           echo "app_name=$appName" >> $env:GITHUB_OUTPUT
 
       - name: Build package
         shell: pwsh
-        run: ./scripts/Build-IntuneWinPackage.ps1 -AppName "${{ steps.setvars.outputs.app_name }}"
+        run: ./scripts/Build-IntuneWinPackage.ps1 `
+            -AppName "${{ steps.setvars.outputs.app_name }}" `
+            -SharePointUser "${{ secrets.SHAREPOINT_USER }}" `
+            -SharePointPassword "${{ secrets.SHAREPOINT_PASSWORD }}"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
