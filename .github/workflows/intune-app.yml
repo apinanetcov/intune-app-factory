@@ -55,8 +55,9 @@ jobs:
         shell: pwsh
         run: ./scripts/Build-IntuneWinPackage.ps1 `
             -AppName "${{ steps.setvars.outputs.app_name }}" `
-            -SharePointUser "${{ secrets.SHAREPOINT_USER }}" `
-            -SharePointPassword "${{ secrets.SHAREPOINT_PASSWORD }}"
+            -TenantId "${{ secrets.AZURE_TENANT_ID }}" `
+            -ClientId "${{ secrets.AZURE_CLIENT_ID }}" `
+            -ClientSecret "${{ secrets.AZURE_CLIENT_SECRET }}"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
