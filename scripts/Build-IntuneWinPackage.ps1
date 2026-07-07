@@ -28,7 +28,7 @@ if (-not (Get-Module -ListAvailable -Name PnP.PowerShell)) {
     Install-Module PnP.PowerShell -Force -Scope CurrentUser
 }
 
-Import-Module PnP.PowerShel
+Import-Module PnP.PowerShell
 
 if ($app.SourceUri -match "sharepoint.com") {
 
