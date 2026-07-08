@@ -29,6 +29,9 @@ if (-not (Get-Module -ListAvailable -Name PnP.PowerShell)) {
 }
 
 Import-Module PnP.PowerShell
+if (-not (Test-Path $PnPCertificate)) {
+    throw "Certificate path not found: $PnPCertificate"
+}
 
 if ($app.SourceUri -match "sharepoint.com") {
 
