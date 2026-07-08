@@ -17,14 +17,26 @@ function Test-Detection {
 
 Write-Host "=== INSTALL ==="
 if ($appJson.InstallerType -eq "MSI") {
-    $proc = Start-Process msiexec.exe -ArgumentList "/i `"$setupFile`" /qn /norestart" -Wait -PassThru
+    $logFile = Join-Path $env:TEMP "$AppName-install.log"
+    $proc = Start-Process msiexec.exe -ArgumentList "/i `"$setupFile`" /qn /norestart /L*v `"$logFile`"" -Wait -PassThru
+    Write-Host "MSI log: $logFile"
 } else {
     throw "InstallerType '$($appJson.InstallerType)' not yet handled by Test-AppPackage.ps1 — add EXE branch here."
 }
+if ($proc.ExitCode -notin 0,3010) {
 
-if ($proc.ExitCode -notin 0, 3010) {
+    Write-Host "===== MSI LOG (LAST 100 LINES) ====="
+
+    if (Test-Path $logFile) {
+        Get-Content $logFile -Tail 100
+    }
+
     throw "Install failed with exit code $($proc.ExitCode)"
 }
+
+#if ($proc.ExitCode -notin 0, 3010) {
+#    throw "Install failed with exit code $($proc.ExitCode)"
+#}
 Start-Sleep -Seconds 15
 
 Write-Host "=== VERIFY INSTALLED ==="
