@@ -1,8 +1,8 @@
 param(
     [Parameter(Mandatory)][string]$AppName,
     [Parameter(Mandatory)][string]$TenantId,
-    [Parameter(Mandatory)][string]$ClientId,
-    [Parameter(Mandatory)][string]$ClientSecret
+    [Parameter(Mandatory)][string]$PnPClientId,
+    [Parameter(Mandatory)][string]$PnPCertificate
 )
 
 $ErrorActionPreference = "Stop"
@@ -36,8 +36,8 @@ if ($app.SourceUri -match "sharepoint.com") {
 
     Connect-PnPOnline `
         -Url "https://1svh3d.sharepoint.com/sites/Intune-App-Factory" `
-        -ClientId $ClientId `
-        -ClientSecret $ClientSecret `
+        -ClientId $PnPClientId `
+        -CertificatePath $PnPCertificate `
         -Tenant $TenantId
 
     $sharePointFileUrl = "/sites/Intune-App-Factory/Shared Documents/Intune-App-Factory Installers/$($app.SetupFileName)"

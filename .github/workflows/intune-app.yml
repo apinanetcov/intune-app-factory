@@ -56,8 +56,8 @@ jobs:
         run: ./scripts/Build-IntuneWinPackage.ps1 `
             -AppName "${{ steps.setvars.outputs.app_name }}" `
             -TenantId "${{ secrets.AZURE_TENANT_ID }}" `
-            -ClientId "${{ secrets.AZURE_CLIENT_ID }}" `
-            -ClientSecret "${{ secrets.AZURE_CLIENT_SECRET }}"
+            -PnPClientId "${{ secrets.PNP_CLIENT_ID }}" `
+            -PnPCertificate "${{ secrets.PNP_CERT_LOCAL }}"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
