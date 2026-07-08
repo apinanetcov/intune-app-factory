@@ -30,11 +30,25 @@ if (-not (Get-Module -ListAvailable -Name PnP.PowerShell)) {
 
 Import-Module PnP.PowerShell
 Set-PSDebug -Trace 1
+
+
+Write-Host "Directory exists: $(Test-Path 'C:\Utility\mycertificates')"
+
+Get-ChildItem 'C:\Utility\mycertificates' | ForEach-Object {
+    Write-Host "Found file: $($_.Name)"
+}
+
+Write-Host "Length: $($PnPCertificate.Length)"
+
+$PnPCertificateBytes = [System.Text.Encoding]::UTF8.GetBytes($PnPCertificate)
+Write-Host "Byte Count: $($PnPCertificateBytes.Count)"
+
+$PnPCertificate = $PnPCertificate.Trim()
+
+Write-Host "Exists after trim: $(Test-Path $PnPCertificate)"
+
 Write-Host "PnPCertificate = [$PnPCertificate]"
 Write-Host "Current User = $([System.Security.Principal.WindowsIdentity]::GetCurrent().Name)"
-Write-Host "Exists = $(Test-Path $PnPCertificate)"
-
-Get-ChildItem "C:\Utility\mycertificates" -ErrorAction SilentlyContinue
 
 if (-not (Test-Path $PnPCertificate)) {
     throw "Certificate path not found: $PnPCertificate"
