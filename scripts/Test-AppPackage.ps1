@@ -17,8 +17,8 @@ function Test-Detection {
 
 Write-Host "=== INSTALL ==="
 if ($appJson.InstallerType -eq "MSI") {
-    $logFile = Join-Path $env:TEMP "$AppName-install.log"
-    $proc = Start-Process msiexec.exe -ArgumentList "/i `"$setupFile`" /qn /norestart /L*v `"$logFile`"" -Wait -PassThru
+    $arguments = "/i `"$setupFile`" $($appJson.InstallArguments)"
+    $proc = Start-Process msiexec.exe -ArgumentList $arguments -Wait -PassThru
     Write-Host "MSI log: $logFile"
 } else {
     throw "InstallerType '$($appJson.InstallerType)' not yet handled by Test-AppPackage.ps1 — add EXE branch here."

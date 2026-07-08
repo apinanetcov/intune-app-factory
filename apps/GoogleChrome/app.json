@@ -7,6 +7,7 @@
   "SourceUri": "https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi",
   "SetupFileName": "GoogleChromeStandaloneEnterprise64.msi",
   "Architecture": "x64",
+  "InstallArguments": "/qn /norestart",
   "MinimumSupportedWindowsRelease": "W10_1809",
   "Category": "Browsers",
   "InformationURL": "https://www.google.com/chrome",
