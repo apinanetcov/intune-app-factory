@@ -11,7 +11,7 @@
   "MinimumSupportedWindowsRelease": "W10_1809",
   "Category": "Productivity",
   "InformationURL": "https://www.7-zip.org",
-  "PrivacyURL": "https://www.7-zip.org privacy",
+  "PrivacyURL": "https://www.7-zip.org",
   "AssignmentGroupName": "SG-Intune-App-7-Zip-Pilot",
   "InstallExperience": "system",
   "RestartBehavior": "suppress"
