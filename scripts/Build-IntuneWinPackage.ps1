@@ -29,6 +29,7 @@ if (-not (Get-Module -ListAvailable -Name PnP.PowerShell)) {
 }
 
 Import-Module PnP.PowerShell
+Set-PSDebug -Trace 1
 if (-not (Test-Path $PnPCertificate)) {
     throw "Certificate path not found: $PnPCertificate"
 }
@@ -59,7 +60,7 @@ else {
     Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing
 
 }
-
+Set-PSDebug -Off
 Write-Host "Installing IntuneWin32App module (if needed)"
 if (-not (Get-Module -ListAvailable -Name IntuneWin32App)) {
     Install-Module -Name IntuneWin32App -Force -AcceptLicense -Scope CurrentUser
