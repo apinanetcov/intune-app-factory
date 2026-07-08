@@ -30,6 +30,12 @@ if (-not (Get-Module -ListAvailable -Name PnP.PowerShell)) {
 
 Import-Module PnP.PowerShell
 Set-PSDebug -Trace 1
+Write-Host "PnPCertificate = [$PnPCertificate]"
+Write-Host "Current User = $([System.Security.Principal.WindowsIdentity]::GetCurrent().Name)"
+Write-Host "Exists = $(Test-Path $PnPCertificate)"
+
+Get-ChildItem "C:\Utility\mycertificates" -ErrorAction SilentlyContinue
+
 if (-not (Test-Path $PnPCertificate)) {
     throw "Certificate path not found: $PnPCertificate"
 }
