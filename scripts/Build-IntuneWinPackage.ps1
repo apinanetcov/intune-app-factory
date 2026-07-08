@@ -31,6 +31,16 @@ if (-not (Get-Module -ListAvailable -Name PnP.PowerShell)) {
 Import-Module PnP.PowerShell
 Set-PSDebug -Trace 1
 
+Write-Host "Computer: $env:COMPUTERNAME"
+
+Write-Host "`nC:\ contents:"
+Get-ChildItem C:\ | Select-Object Name
+
+Write-Host "`nUtility exists:"
+Test-Path "C:\Utility"
+
+Write-Host "`nmycertificates exists:"
+Test-Path "C:\Utility\mycertificates"
 
 Write-Host "Directory exists: $(Test-Path 'C:\Utility\mycertificates')"
 
