@@ -71,7 +71,7 @@ jobs:
 
       - name: Run install/uninstall test
         shell: pwsh
-        run: ./scripts/Test-AppPackage-v2.ps1 -AppName "${{ needs.build.outputs.app_name }}" -ArtifactFolder "artifact"
+        run: ./scripts/Test-AppPackage-v3.ps1 -AppName "${{ needs.build.outputs.app_name }}" -ArtifactFolder "artifact"
 
   publish:
     name: Publish to Intune
