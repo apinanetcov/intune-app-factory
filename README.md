@@ -402,7 +402,7 @@ git checkout -b add-7zip
 
 # Create:
 # apps/7-Zip/app.json
-# apps/7-Zip/test-d*tection.ps1
+# apps/7-Zip/test-detection.ps1
 
 git add .
 git commit -m "Added 7-Zip package [app:7-Zip]"
