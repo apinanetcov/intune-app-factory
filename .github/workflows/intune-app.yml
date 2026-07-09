@@ -27,17 +27,17 @@ jobs:
         run: |
           $appName = "${{ github.event.inputs.app_name }}"
 
-            if (-not $appName) {
-                $commitMessage = "${{ github.event.head_commit.message }}"
-                
-                if ($commitMessage -match '\[app:(.+?)\]') {
-                    $appName = $matches[1]
-                }
-            }
+          if (-not $appName) {
+              $commitMessage = "${{ github.event.head_commit.message }}"
+              
+              if ($commitMessage -match '\[app:(.+?)\]') {
+                  $appName = $matches[1]
+              }
+          }
 
-            if (-not $appName) {
-                Write-Error "App name not provided. Use workflow_dispatch input or commit message [app:AppName]"
-            }
+          if (-not $appName) {
+              Write-Error "App name not provided. Use workflow_dispatch input or commit message [app:AppName]"
+          }
 
       - name: Build package
         shell: pwsh
