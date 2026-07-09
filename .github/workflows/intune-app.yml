@@ -90,7 +90,7 @@ jobs:
       - name: Publish to Intune
         shell: pwsh
         run: |
-          ./scripts/Publish-IntuneApp.ps1 `
+          ./scripts/Publish-IntuneApp-v2.ps1 `
             -AppName "${{ needs.build.outputs.app_name }}" `
             -ArtifactFolder "artifact" `
             -TenantId "${{ secrets.AZURE_TENANT_ID }}" `
