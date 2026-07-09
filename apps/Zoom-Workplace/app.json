@@ -1,0 +1,18 @@
+{
+  "Name": "Zoom Workplace",
+  "DisplayName": "Zoom Workplace",
+  "Publisher": "Zoom",
+  "Description": "Plugin for mobile device screen sharing included.",
+  "InstallerType": "MSI",
+  "SourceUri": "https://zoom.us/client/7.1.0.41345/ZoomInstallerFull.msi?archType=x64",
+  "SetupFileName": "ZoomInstallerFull.msi",
+  "Architecture": "x64",
+  "InstallArguments": "/quiet /qn /norestart /log install.log",
+  "MinimumSupportedWindowsRelease": "W10_1809",
+  "Category": "Productivity",
+  "InformationURL": "https://zoom.us",
+  "PrivacyURL": "https://www.zoom.com/en/trust/privacy/privacy-statement/?ampDeviceId=efffdd1c-d60e-496d-98e5-c7f1e2340066&ampDeviceId=efffdd1c-d60e-496d-98e5-c7f1e2340066&ampSessionId=1783604953382&ampSessionId=1783604953382&_gl=1*1ig0fpr*_ga*MTc1MDg1MjM4Mi4xNzgzNjA0OTg1*_ga_L8TBF28DDX*czE3ODM2MDQ5ODQkbzEkZzEkdDE3ODM2MDUzMzgkajYwJGwwJGgw",
+  "AssignmentGroupName": "SG-Intune-App-Zoom-Pilot",
+  "InstallExperience": "system",
+  "RestartBehavior": "suppress"
+}
