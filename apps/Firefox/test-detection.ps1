@@ -1,7 +1,7 @@
 $app = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", `
                          "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" `
     -ErrorAction SilentlyContinue |
-    Where-Object { $_.DisplayName -like "Firefox*" }
+    Where-Object { $_.DisplayName -like "*Firefox*" }
 
 if ($app) {
     Write-Output "DETECTED: $($app.DisplayName) $($app.DisplayVersion)"
