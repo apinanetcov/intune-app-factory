@@ -7,6 +7,7 @@
   "SourceUri": "https://download.mozilla.org/?product=firefox-msi-latest-ssl&os=win64&lang=en-US&_gl=1*ppfkao*_ga*MTU5MzI0MDYwOS4xNzgzNjEzODEx*_ga_2VC139B3XV*czE3ODM2MTM4MTEkbzEkZzEkdDE3ODM2MTQxMDUkajIzJGwwJGgw",
   "SetupFileName": "Firefox Setup 152.0.5.msi",
   "Architecture": "x64",
+  "UninstallCommand": "\"C:\\Program Files\\Mozilla Firefox\\uninstall\\helper.exe\" /S",
   "InstallArguments": "/quiet /norestart",
   "MinimumSupportedWindowsRelease": "W10_1809",
   "Category": "Productivity",
