@@ -74,11 +74,6 @@ if ($appJson.InstallerType -eq "MSI") {
         $null, $record, @([int]1)
     )
     Write-Host "MSI ProductCode: $productCode"
-    Get-ItemProperty `
-    "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" ,
-    "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" |
-    Where-Object {$_.DisplayName -like "*Firefox*"} |
-    Select-Object DisplayName,PSChildName,UninstallString
     
     $proc = Start-Process msiexec.exe -ArgumentList "/x $productCode /qn /norestart" -Wait -PassThru
     if ($proc.ExitCode -notin 0, 3010) {
