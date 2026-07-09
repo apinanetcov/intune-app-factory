@@ -25,6 +25,10 @@ jobs:
         id: setvars
         shell: pwsh
         run: |
+          Write-Host "Event name: '${{ github.event_name }}'"
+          Write-Host "Input app_name: '${{ github.event.inputs.app_name }}'"
+          Write-Host "Head commit: '${{ github.event.head_commit.message }}'"
+          Write-Host "PR title: '${{ github.event.pull_request.title }}'"
           $appName = "${{ github.event.inputs.app_name }}"
 
           if (-not $appName) {
