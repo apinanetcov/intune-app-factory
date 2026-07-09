@@ -23,32 +23,20 @@ jobs:
 
       - name: Determine app name
         id: setvars
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const appName = "${{ github.event.inputs.app_name }}";
-            
-            if (!appName) {
-              const { data: commits } = await github.rest.repos.compareCommits({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                base: context.payload.pull_request?.base.sha || '${{ github.event.before }}',
-                head: context.payload.pull_request?.head.sha || '${{ github.sha }}'
-              });
-              
-              const changedFiles = commits.flatMap(c => c.files.map(f => f.filename));
-              const appJsonMatch = changedFiles.find(f => f.match(/^apps\/([^/]+)\/app\.json$/));
-              
-              if (appJsonMatch) {
-                const detected = appJsonMatch.match(/^apps\/([^/]+)\/app\.json$/)[1];
-                core.setOutput("app_name", detected);
-                console.log(`Deploying app: ${detected}`);
-              } else {
-                core.setFailed("No app.json file was added or edited. Workflow will not proceed.");
-              }
-            } else {
-              core.setOutput("app_name", appName);
-              console.log(`Deploying app: ${appName}`);
+        shell: pwsh
+        run: |
+          $appName = "${{ github.event.inputs.app_name }}"
+
+            if (-not $appName) {
+                $commitMessage = "${{ github.event.head_commit.message }}"
+                
+                if ($commitMessage -match '\[app:(.+?)\]') {
+                    $appName = $matches[1]
+                }
+            }
+
+            if (-not $appName) {
+                Write-Error "App name not provided. Use workflow_dispatch input or commit message [app:AppName]"
             }
 
       - name: Build package
