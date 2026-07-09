@@ -25,10 +25,6 @@ jobs:
         id: setvars
         shell: pwsh
         run: |
-          Write-Host "Event name: '${{ github.event_name }}'"
-          Write-Host "Input app_name: '${{ github.event.inputs.app_name }}'"
-          Write-Host "Head commit: '${{ github.event.head_commit.message }}'"
-          Write-Host "PR title: '${{ github.event.pull_request.title }}'"
           $appName = "${{ github.event.inputs.app_name }}"
 
           if (-not $appName) {
@@ -42,6 +38,8 @@ jobs:
           if (-not $appName) {
               Write-Error "App name not provided. Use workflow_dispatch input or commit message [app:AppName]"
           }
+          Write-Host "Using app name: $appName"
+          "app_name=$appName" >> $env:GITHUB_OUTPUT
 
       - name: Build package
         shell: pwsh
