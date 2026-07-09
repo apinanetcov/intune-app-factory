@@ -1,249 +1,415 @@
-# intune-app-factory
-Use for automated Intunewin Packages
-Here's the updated README section to include the SharePoint authorization information:
-
-```markdown
 # Intune App Factory
-
-Automated deployment pipeline for packaging and publishing applications to Microsoft Intune.
 
 ## Overview
 
-This repository contains scripts and configurations to build, test, and deploy Windows applications as Win32 packages to Microsoft Intune. The workflow is triggered on push events and automatically handles the entire deployment lifecycle.
+Intune App Factory provides a standardized process for packaging, validating, and deploying Win32 applications to Microsoft Intune.
+
+The repository uses GitHub Actions to automate the complete application lifecycle:
+
+1. Build a Win32 (`.intunewin`) package.
+2. Test application installation and detection on a dedicated self-hosted runner.
+3. Require manual approval before production deployment.
+4. Upload the application to Microsoft Intune.
+5. Assign the application to a pre-defined Entra ID / Intune group.
+
+This approach ensures all applications are validated before being made available to users and provides a consistent deployment experience across the organization.
+
+---
+
+## End-to-End Workflow
+
+```text
+Engineer
+    |
+    v
+Clone Repository
+    |
+    v
+Create Feature Branch
+    |
+    v
+Add New App Folder
+(apps/<AppName>)
+    |
+    v
+Commit Changes
+(commit message must contain [app:<AppName>])
+    |
+    v
+Push Branch
+    |
+    v
+Create Pull Request
+    |
+    v
+Peer Review Required
+(1 approval minimum)
+    |
+    v
+Merge to Main
+    |
+    v
+Build .intunewin Package
+    |
+    v
+Install / Detection Test
+on Self-Hosted Runner
+    |
+    v
+Production Approval Gate
+    |
+    v
+Publish to Intune
+    |
+    v
+Assign to Deployment Group
+```
+
+---
 
 ## Repository Structure
 
-```
-intune-app-factory/
-├── .github/
-│   └── workflows/
-│       └── intune-app.yml              # GitHub Actions workflow
-├── apps/                               # Application definitions
-│   ├── GoogleChrome/
-│   │   ├── app.json                    # App configuration
-│   │   └── test-detection.ps1          # Detection rule test script
-│   └── Egnyte/
+```text
+.
+├── apps
+│   └── <AppName>
 │       ├── app.json
 │       └── test-detection.ps1
-├── scripts/                            # PowerShell deployment scripts
-│   ├── Build-IntuneWinPackage.ps1      # Packages app as .intunewin
-│   ├── Test-AppPackage.ps1             # Validates package integrity
-│   └── Publish-IntuneApp.ps1           # Deploys to Intune
-└── terraform/                          # Infrastructure as Code (future use)
+│
+├── scripts
+│   ├── Build-IntuneWinPackage.ps1
+│   ├── Test-AppPackage.ps1
+│   └── Publish-IntuneApp.ps1
+│
+└── .github
+    └── workflows
+        └── intune-app-factory.yml
 ```
+
+---
 
 ## Adding a New Application
 
-### Step 1: Create the App Directory
-
-Create a new folder under `apps/` for your application:
-
-```bash
-mkdir apps/YourAppName
-```
-
-### Step 2: Create `app.json`
-
-Create an `app.json` file in the app directory with the application configuration. You can obtain the MSI installer in two ways:
-
-**Option A: Remote MSI (via SourceUri from Vendor)**
-
-If the vendor provides a direct download link to the MSI:
-
-```json
-{
-  "Name": "YourAppName",
-  "DisplayName": "Your App Display Name",
-  "Publisher": "App Publisher",
-  "Description": "Brief description of the application",
-  "InstallerType": "MSI",
-  "SourceUri": "https://example.com/path/to/installer.msi",
-  "SetupFileName": "installer.msi",
-  "Architecture": "x64",
-  "MinimumSupportedWindowsRelease": "W10_1809",
-  "Category": "CategoryName",
-  "InformationURL": "https://example.com",
-  "PrivacyURL": "https://example.com/privacy",
-  "AssignmentGroupName": "SG-Intune-App-YourApp-Pilot",
-  "InstallExperience": "system",
-  "RestartBehavior": "suppress"
-}
-```
-
-**Option B: MSI Hosted on SharePoint**
-
-If the vendor does not provide a SourceUri, upload the MSI to the **[Intune-App-Factory SharePoint site]** in the **'Intune-App-Factory Installers'** folder, then use the SharePoint link as your `SourceUri`:
-
-1. Upload the MSI to: [Intune-App-Factory > Intune-App-Factory Installers](https://1svh3d.sharepoint.com/:f:/s/Intune-App-Factory/IgBjWgVTSTCyRJcVYoI7WDyqAVdBDrpK6hrADok0PyT5RI8?e=NV3U0w)
-2. Right-click the MSI file and select "Share"
-3. Set sharing to **"People in [My Organization]"**
-4. Copy the link and use it in your `app.json`:
-
-```json
-{
-  "Name": "YourAppName",
-  "DisplayName": "Your App Display Name",
-  "Publisher": "App Publisher",
-  "Description": "Brief description of the application",
-  "InstallerType": "MSI",
-  "SourceUri": "https://yourtenant.sharepoint.com/sites/intune-app-factory/Shared%20Documents/Intune-App-Factory%20Installers/YourApp.msi",
-  "SetupFileName": "YourApp.msi",
-  "Architecture": "x64",
-  "MinimumSupportedWindowsRelease": "W10_1809",
-  "Category": "CategoryName",
-  "InformationURL": "https://example.com",
-  "PrivacyURL": "https://example.com/privacy",
-  "AssignmentGroupName": "SG-Intune-App-YourApp-Pilot",
-  "InstallExperience": "system",
-  "RestartBehavior": "suppress"
-}
-```
-
-### Step 3: Create `test-detection.ps1`
-
-Create a PowerShell script to test the detection rule. This validates that the app can be properly detected after installation:
+### 1. Clone the Repository
 
 ```powershell
-# Example detection rule test for MSI-based app
-$productCode = "{PRODUCT-CODE-GUID}"
-$installedApp = Get-WmiObject -Class Win32_Product | Where-Object { $_.IdentifyingNumber -eq $productCode }
+git clone <repository-url>
+cd intune-app-factory
+```
 
-if ($installedApp) {
-    Write-Host "✓ Application detected: $($installedApp.Name) $($installedApp.Version)"
+### 2. Create a Feature Branch
+
+```powershell
+git checkout -b add-7zip
+```
+
+### 3. Create a New Application Folder
+
+Create a folder under the `apps` directory.
+
+Example:
+
+```text
+apps/
+└── 7-Zip/
+    ├── app.json
+    └── test-detection.ps1
+```
+
+---
+
+## app.json
+
+Each application must contain an `app.json` file.
+
+Example:
+
+```json
+{
+  "Name": "7-Zip",
+  "DisplayName": "7-Zip",
+  "Publisher": "7-Zip",
+  "Description": "7-Zip is a file archiver with a high compression ratio.",
+  "InstallerType": "MSI",
+  "SourceUri": "https://github.com/ip7z/7zip/releases/download/26.02/7z2602-x64.msi",
+  "SetupFileName": "7z2602-x64.msi",
+  "Architecture": "x64",
+  "InstallArguments": "/qn /norestart",
+  "MinimumSupportedWindowsRelease": "W10_1809",
+  "Category": "Productivity",
+  "InformationURL": "https://www.7-zip.org",
+  "PrivacyURL": "https://www.7-zip.org",
+  "AssignmentGroupName": "SG-Intune-App-7-Zip-Pilot",
+  "InstallExperience": "system",
+  "RestartBehavior": "suppress"
+}
+```
+
+### Important Fields
+
+| Field | Description |
+|---------|-------------|
+| DisplayName | Name displayed in Intune |
+| SourceUri | Installer download location |
+| SetupFileName | Installer filename |
+| InstallerType | Currently supports MSI |
+| InstallArguments | Silent install arguments |
+| AssignmentGroupName | Intune group to receive the application |
+| Architecture | x64, x86, etc. |
+| MinimumSupportedWindowsRelease | Minimum supported Windows version |
+
+---
+
+## Installer Sources
+
+Two installer source methods are supported.
+
+### Option 1: SharePoint Hosted Installer
+
+Upload the installer to the Intune App Factory SharePoint site.
+
+Use the following value in `app.json`:
+
+```json
+"SourceUri": "https://1svh3d.sharepoint.com/sites/Intune-App-Factory"
+```
+
+The build process will:
+
+- Authenticate using PnP PowerShell.
+- Retrieve the installer from SharePoint.
+- Match the file using the `SetupFileName` value.
+
+Example:
+
+```json
+{
+  "SourceUri": "https://1svh3d.sharepoint.com/sites/Intune-App-Factory",
+  "SetupFileName": "7z2602-x64.msi"
+}
+```
+
+### Option 2: External Download URL
+
+Specify a direct download URL.
+
+Example:
+
+```json
+{
+  "SourceUri": "https://github.com/ip7z/7zip/releases/download/26.02/7z2602-x64.msi"
+}
+```
+
+The build process downloads the installer directly from the URL.
+
+---
+
+## Detection Script
+
+Each application must include a detection script named:
+
+```text
+test-detection.ps1
+```
+
+The script is used during automated validation.
+
+### Requirements
+
+The script must:
+
+- Return exit code `0` when the application is installed.
+- Return exit code `1` when the application is not installed.
+
+Example:
+
+```powershell
+$app = Get-ItemProperty `
+    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", `
+    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" `
+    -ErrorAction Sil*ntlyContinue |
+    Where-Object { *_.DisplayName*-like "7-Zip*" }
+
+if ($app) {
+    *rite-Output "DETECTED: $($app.Disp*ayName)"
     exit 0
-} else {
-    Write-Host "✗ Application not detected"
-    exit 1
+}
+else {
+    W*ite-Output "NOT DETECTED"
+    exit*1
 }
 ```
 
-### Step 4: Update Assignment Group
+---
 
-Ensure the Entra ID security group specified in `AssignmentGroupName` exists. The group will be automatically found and the app assigned to it during deployment. Also, make sure that any devices to recieve the app are part of the group.
+## Commit Requiremen*s
 
-## Configuration
+When adding or modifying an app*ication, the commit message **must** contain:
 
-### GitHub Secrets
-
-The workflow requires the following secrets to be configured in your GitHub repository settings:
-
-- **`TENANT_ID`** - Your Azure tenant ID
-- **`CLIENT_ID`** - Application (client) ID of your app registration
-- **`CLIENT_SECRET`** - Client secret for the app registration
-- **`SHAREPOINT_USER`** - Your SharePoint user email (required for apps hosted on SharePoint)
-- **`SHAREPOINT_PASSWORD`** - Your SharePoint password or app password (required for apps hosted on SharePoint)
-
-### Entra ID App Registration
-
-Ensure your app registration has the following API permissions granted:
-
-- **Microsoft Graph**
-  - `DeviceManagementApps.ReadWrite.All` (Application)
-  - `Group.Read.All` (Application)
-
-Admin consent must be granted for these permissions.
-
-### SharePoint Authentication
-
-The workflow automatically detects SharePoint URLs and authenticates using the `SHAREPOINT_USER` and `SHAREPOINT_PASSWORD` secrets. Ensure these are configured in your GitHub repository settings.
-
-**Note on MFA**: If your organization uses Multi-Factor Authentication (MFA), you may need to use an **app password** instead of your regular password. Contact your SharePoint administrator for assistance generating an app password.
-
-## Deployment Workflow
-
-The GitHub Actions workflow (`intune-app.yml`) performs the following steps:
-
-1. **Build** - Packages the MSI into a `.intunewin` file using the Intune Win32 Content Prep Tool
-   - Downloads the MSI from the provided `SourceUri` (with SharePoint authentication if needed)
-2. **Test** - Validates the package integrity and runs detection rule tests
-3. **Publish** - Deploys the app to Intune:
-   - Creates a new Win32 app or updates an existing one
-   - Assigns the app to the specified Entra ID security group
-   - Sets installation and restart behavior
-
-## Triggering a Deployment
-
-Deployments are triggered automatically when changes are pushed to the repository. Modify any `app.json` file and push to trigger a new build and deployment.
-
-```bash
-git add apps/YourApp/app.json
-git commit -m "Update YourApp version"
-git push
+```text
+[app:<AppName>*
 ```
 
-## Troubleshooting
+Example:
 
-### SharePoint Download Failures
+```text
+Added new *pplication definition [app:7-Zip]
+*``
 
-If you receive authentication errors when downloading from SharePoint:
+The workflow uses this value t* identify which*application should be built and de*loyed.
 
-1. Verify that `SHAREPOINT_USER` and `SHAREPOINT_PASSWORD` secrets are configured correctly
-2. If using MFA, ensure you're using an app password, not your regular password
-3. Confirm the MSI file is set to "People in [My Organization]" sharing
-4. Check that your account has access to the SharePoint site
+---
 
-### App Not Found in Intune
+## Pull Request Proce*s
 
-Verify that:
-- The workflow completed successfully (check GitHub Actions logs)
-- The app definition in `app.json` is valid JSON
-- The assignment group exists in Entra ID with the exact name specified
-- The `SourceUri` is accessible and returns a valid MSI file
+1.*Push your feature branch.
+2. Creat* a Pull Request.
+3. Obtain approva* from at least one reviewer.
+4. Me*ge into `main`.
 
-### MSI Detection Issues
+A merge to `main`*triggers the deployment workflow.
+*---
 
-Test the detection rule locally:
+# Pipeline Stages
+
+## Stage 1*- Build
+
+The workflow:
+
+1. Reads `*pp.json`.
+2. Downloads the install*r.
+3. Builds a `.intunewin` packag*.
+4. Produces artifacts containing*
+   - `.intunewin`
+   - `app.json`*   - `test-detection.ps1`
+   - Ori*inal installer
+
+Output location:
+
+*``text
+build/<AppName>/output
+```
+*---
+
+## Stage 2 - Test
+
+Testing oc*urs on the dedicated self-hosted r*nner.
+
+The test process:
+
+1. Insta*ls the application.
+2. Executes `t*st-detection.ps1`.
+3. Verifies the*application is detected.
+4. Uninst*lls the application.
+5. Executes `*est-detection.ps1` again.
+6. Verif*es the application is no longer de*ected.
+
+The deployment continues o*ly if all tests pass.
+
+### Current*Limitation
+
+Automated testing curr*ntly supports:
+
+*``*son
+"InstallerType": "MSI"
+*``
+
+Additional installer types may*require updates to the test framew*rk.
+
+---
+
+## Stage 3 - Production *pproval
+
+After successful testing,*GitHub pauses the workflow at the *roduction environment approval gat*.
+
+Deployment cannot proceed until*an authorized approver approves th* release.
+
+---
+
+## Stage 4 - Publi*h to Intune
+
+The publish process:
+*1. Connects to Microsoft Intune.
+2* Creates a new Win32 application i* one does not already exist.
+3. Up*ates an existing application if fo*nd.
+4. Uploads the latest `.intune*in` package.
+5. Applies applicatio* metadata.
+6. Assigns the applicat*on to the target deployment group *efined in `AssignmentGroupName`.
+
+*eployment assignment type:
+
+```tex*
+Required
+```
+
+---
+
+# Required Git*ub Secrets
+
+The following GitHub A*tions secrets must be configured.
+*| Secret | Purpose |
+|----------|-*--------|
+| AZURE_CLIENT_ID | Appl*cation registration used for Intun* uploads |
+| AZURE_TENANT_ID | Azu*e tenant ID |
+| AZURE_CLIENT_SECRE* | Application secret used for Int*ne uploads |
+| PNP_CLIENT_ID | PnP*PowerShell application registratio* |
+| PNP_CERT_LOCAL | Path to PnP *ertificate (.pfx) on the self-host*d runner |
+
+---
+
+## Self-Hosted Ru*ner Requirements
+
+The build and te*t jobs run on a self-hosted Window* runner with the labels:
+
+```text
+*elf-hosted
+windows
+intune-test
+```*
+The runner must have:
+
+- Network *ccess to SharePoint (if used).
+- A*cess to the PnP certificate specif*ed in `PNP_CERT_LOCAL`.
+- PowerShe*l execution enabled.
+- Administrat*ve rights to install and uninstall*software during testing.
+
+---
+
+## *ublishing Results
+
+Upon successful*completion:
+
+- Win32 application i* uploaded to Intune.
+- Existing ap*lications are updated automaticall*.
+- New applications are created a*tomatically.
+- Required deployment*assignment is configured.
+- Applic*tion is assigned to the group spec*fied in:
+
+```json
+"AssignmentGroup*ame"
+```
+
+---
+
+## Example Contribu*or Workflow
 
 ```powershell
-cd apps/YourAppName
-./test-detection.ps1
+git che*kout -b add-7zip
+
+# Create:
+# apps*7-Zip/app.json
+# apps/7-Zip/test-d*tection.ps1
+
+git add .
+git commit *m "Added 7-Zip package [app:7-Zip]*
+git push origin add-7zip
 ```
 
-Ensure the product code or registry path in your detection rule is correct for the MSI.
+The*:
 
-### Authentication Failures
-
-Verify that:
-- GitHub secrets are configured correctly
-- The app registration exists in your tenant
-- The app registration has required API permissions with admin consent granted
-- For SharePoint URLs, the `SHAREPOINT_USER` and `SHAREPOINT_PASSWORD` secrets are set
-
-## MSI Storage
-
-All MSI installers for applications without vendor-provided download links should be stored in the **[Intune-App-Factory SharePoint site]** under the **'Intune-App-Factory Installers'** folder. This centralized location makes it easy to manage, version, and share installer files across the team.
-
-## Supported Application Types
-
-Currently, this factory supports:
-
-- **MSI-based applications** - Windows Installer packages
-
-Future support planned for:
-- EXE installers
-- MSP patches
-- LOB applications
-
-## References
-
-- [Microsoft Intune Win32 App Management](https://learn.microsoft.com/en-us/mem/intune/apps/apps-win32-app-management)
-- [Intune Win32 Content Prep Tool](https://github.com/microsoft/Microsoft-Win32-Content-Prep-Tool)
-- [Microsoft Graph API - Groups](https://learn.microsoft.com/en-us/graph/api/resources/group)
-
-## License
-
-[License will be added here eventually if needed]
-
-## Support
-
-For issues or questions, please create a GitHub issue in this repository.
-```
-
-## Key Additions
-
-✅ Added "MSI Hosted on SharePoint" option in Step 2  
-✅ Added instructions for uploading MSI files to SharePoint  
-✅ Added `SHAREPOINT_USER` and `SHAREPOINT_PASSWORD` to GitHub Secrets section  
-✅ Added SharePoint Authentication configuration section with MFA note  
-✅ Added troubleshooting section for SharePoint download failures  
-✅ Added new "MSI Storage" section highlighting the centralized SharePoint location  
+1. Open a Pull Request.
+2. Obta*n reviewer approval.
+3. Merge to `main`.
+4. Approve the Production deployment when prompted.
+5. Verify application deployment in Intune.
