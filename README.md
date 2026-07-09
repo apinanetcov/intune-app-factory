@@ -243,173 +243,177 @@ else {
 
 ---
 
-## Commit Requiremen*s
+## Commit Requirements
 
-When adding or modifying an app*ication, the commit message **must** contain:
+When adding or modifying an application, the commit message **must** contain:
 
 ```text
-[app:<AppName>*
+[app:<AppName>]
 ```
 
 Example:
 
 ```text
-Added new *pplication definition [app:7-Zip]
-*``
+Added new application definition [app:7-Zip]
+```
 
-The workflow uses this value t* identify which*application should be built and de*loyed.
+The workflow uses this value to identify which application should be built and deployed.
 
 ---
 
-## Pull Request Proce*s
+## Pull Request Process
 
-1.*Push your feature branch.
-2. Creat* a Pull Request.
-3. Obtain approva* from at least one reviewer.
-4. Me*ge into `main`.
+1. Push your feature branch.
+2. Create a Pull Request.
+3. Obtain approval from at least one reviewer.
+4. Merge into `main`.
 
-A merge to `main`*triggers the deployment workflow.
-*---
+A merge to `main` triggers the deployment workflow.
+---
 
 # Pipeline Stages
 
-## Stage 1*- Build
+## Stage 1 - Build
 
 The workflow:
 
-1. Reads `*pp.json`.
-2. Downloads the install*r.
-3. Builds a `.intunewin` packag*.
-4. Produces artifacts containing*
+1. Reads `app.json`.
+2. Downloads the installer.
+3. Builds a `.intunewin` package.
+4. Produces artifacts containing:
    - `.intunewin`
-   - `app.json`*   - `test-detection.ps1`
-   - Ori*inal installer
+   - `app.json`
+   - `test-detection.ps1`
+   - Original installer
 
 Output location:
 
-*``text
+```text
 build/<AppName>/output
 ```
-*---
+---
 
 ## Stage 2 - Test
 
-Testing oc*urs on the dedicated self-hosted r*nner.
+Testing occurs on the dedicated self-hosted runner.
 
 The test process:
 
-1. Insta*ls the application.
-2. Executes `t*st-detection.ps1`.
-3. Verifies the*application is detected.
-4. Uninst*lls the application.
-5. Executes `*est-detection.ps1` again.
-6. Verif*es the application is no longer de*ected.
+1. Installs the application.
+2. Executes `test-detection.ps1`.
+3. Verifies the application is detected.
+4. Uninstalls the application.
+5. Executes `test-detection.ps1` again.
+6. Verifies the application is no longer detected.
 
-The deployment continues o*ly if all tests pass.
+The deployment continues only if all tests pass.
 
-### Current*Limitation
+### Current Limitation
 
-Automated testing curr*ntly supports:
+Automated testing currently supports:
 
-*``*son
+```json
 "InstallerType": "MSI"
-*``
+```
 
-Additional installer types may*require updates to the test framew*rk.
-
----
-
-## Stage 3 - Production *pproval
-
-After successful testing,*GitHub pauses the workflow at the *roduction environment approval gat*.
-
-Deployment cannot proceed until*an authorized approver approves th* release.
+Additional installer types may require updates to the test framework.
 
 ---
 
-## Stage 4 - Publi*h to Intune
+## Stage 3 - Production approval
+
+After successful testing,*GitHub pauses the workflow at the production environment approval gate*.
+
+Deployment cannot proceed until an authorized approver approves the release.
+
+---
+
+## Stage 4 - Publish to Intune
 
 The publish process:
-*1. Connects to Microsoft Intune.
-2* Creates a new Win32 application i* one does not already exist.
-3. Up*ates an existing application if fo*nd.
-4. Uploads the latest `.intune*in` package.
-5. Applies applicatio* metadata.
-6. Assigns the applicat*on to the target deployment group *efined in `AssignmentGroupName`.
+1. Connects to Microsoft Intune.
+2. Creates a new Win32 application if one does not already exist.
+3. Updates an existing application if found.
+4. Uploads the latest `.intunewin` package.
+5. Applies application metadata.
+6. Assigns the application to the target deployment group defined in `AssignmentGroupName`.
 
-*eployment assignment type:
+Deployment assignment type:
 
-```tex*
+```text
 Required
 ```
 
 ---
 
-# Required Git*ub Secrets
+# Required GitHub Secrets
 
-The following GitHub A*tions secrets must be configured.
-*| Secret | Purpose |
-|----------|-*--------|
-| AZURE_CLIENT_ID | Appl*cation registration used for Intun* uploads |
-| AZURE_TENANT_ID | Azu*e tenant ID |
-| AZURE_CLIENT_SECRE* | Application secret used for Int*ne uploads |
-| PNP_CLIENT_ID | PnP*PowerShell application registratio* |
-| PNP_CERT_LOCAL | Path to PnP *ertificate (.pfx) on the self-host*d runner |
+The following GitHub Actions secrets must be configured.
+| Secret | Purpose |
+|----------|----------|
+| AZURE_CLIENT_ID | Application registration used for Intune uploads |
+| AZURE_TENANT_ID | Azure tenant ID |
+| AZURE_CLIENT_SECRET | Application secret used for Intune uploads |
+| PNP_CLIENT_ID | PnP PowerShell application registration |
+| PNP_CERT_LOCAL | Path to PnP certificate (.pfx) on the self-hosted runner |
 
 ---
 
-## Self-Hosted Ru*ner Requirements
+## Self-Hosted Runner Requirements
 
-The build and te*t jobs run on a self-hosted Window* runner with the labels:
+The build and test jobs run on a self-hosted Windows runner with the labels:
 
 ```text
-*elf-hosted
+self-hosted
 windows
 intune-test
-```*
+```
 The runner must have:
 
-- Network *ccess to SharePoint (if used).
-- A*cess to the PnP certificate specif*ed in `PNP_CERT_LOCAL`.
-- PowerShe*l execution enabled.
-- Administrat*ve rights to install and uninstall*software during testing.
+- Network access to SharePoint (if used).
+- PnP Powershell module installed (Install-Module PnP.PowerShell)
+- IntuneWin32App module installed (Install-Module -Name "IntuneWin32App" -AcceptLicense) 
+- Access to the PnP certificate specified in `PNP_CERT_LOCAL`.
+- PowerShell execution enabled.
+- Administrative rights to install and uninstall software during testing.
 
 ---
 
-## *ublishing Results
+## Publishing Results
 
-Upon successful*completion:
+Upon successful completion:
 
-- Win32 application i* uploaded to Intune.
-- Existing ap*lications are updated automaticall*.
-- New applications are created a*tomatically.
-- Required deployment*assignment is configured.
-- Applic*tion is assigned to the group spec*fied in:
+- Win32 application is uploaded to Intune.
+- Existing applications are updated automatically.
+- New applications are created automatically.
+- Required deployment assignment is configured.
+- Application is assigned to the group specified in:
 
 ```json
-"AssignmentGroup*ame"
+"AssignmentGroupName"
 ```
 
 ---
 
-## Example Contribu*or Workflow
+## Example Contributor Workflow
 
 ```powershell
-git che*kout -b add-7zip
+git checkout -b add-7zip
 
 # Create:
-# apps*7-Zip/app.json
+# apps/7-Zip/app.json
 # apps/7-Zip/test-d*tection.ps1
 
 git add .
-git commit *m "Added 7-Zip package [app:7-Zip]*
+git commit -m "Added 7-Zip package [app:7-Zip]"
 git push origin add-7zip
 ```
+(This can also be done via VSCode GUI if Git module installed. Review SOP for steps)
 
-The*:
+Then:
 
 1. Open a Pull Request.
-2. Obta*n reviewer approval.
+2. Obtain reviewer approval.
 3. Merge to `main`.
 4. Approve the Production deployment when prompted.
 5. Verify application deployment in Intune.
