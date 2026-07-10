@@ -42,6 +42,10 @@ elseif ($appJson.InstallerType -eq "EXE") {
     $installerFile = Get-ChildItem $ArtifactFolder -File |
         Where-Object { $_.Extension -eq ".exe" } |
         Select-Object -First 1
+ 
+    Write-Host "Installer Details:"
+    Get-Item $installerFile.FullName | Select-Object Name, Length, LastWriteTime
+    Get-Content $installerFile.FullName -TotalCount 5
 
     if (-not $installerFile) {
         throw "No EXE installer found in $ArtifactFolder"
