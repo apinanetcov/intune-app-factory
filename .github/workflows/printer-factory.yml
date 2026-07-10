@@ -1,0 +1,30 @@
+name: Printer Factory Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-printer:
+
+    runs-on: [self-hosted, windows, intune-test]
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Display Printer Structure
+        shell: pwsh
+        run: |
+          Get-ChildItem .\apps\printers -Recurse
+
+      - name: Placeholder
+        shell: pwsh
+        run: |
+          Write-Host "Printer workflow is running successfully."
+
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: printer-lab-output
+          path: apps/printers
