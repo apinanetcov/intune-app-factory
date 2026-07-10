@@ -56,11 +56,27 @@ elseif ($appJson.InstallerType -eq "EXE") {
     Write-Host "Using EXE InstallCommand:"
     Write-Host $installCommand
 
+    # Parse executable and arguments
+    if ($installCommand -match '^"([^"]+)"\s*(.*)$') {
+        $exePath = $matches[1]
+        $arguments = $matches[2]
+    }
+    else {
+        $parts = $installCommand -split '\s+', 2
+        $exePath = $parts[0]
+        $arguments = if ($parts.Count -gt 1) { $parts[1] } else { "" }
+    }
+
+    Write-Host "Executable: $exePath"
+    Write-Host "Arguments : $arguments"
+
     $proc = Start-Process `
-        -FilePath "cmd.exe" `
-        -ArgumentList "/c $installCommand" `
+        -FilePath $exePath `
+        -ArgumentList $arguments `
         -Wait `
         -PassThru
+
+    Write-Host "Exit Code: $($proc.ExitCode)"
 }
 else {
 
