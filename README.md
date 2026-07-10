@@ -122,7 +122,7 @@ apps/
 
 Each application must contain an `app.json` file.
 
-Example:
+### MSI Example:
 
 ```json
 {
@@ -144,7 +144,28 @@ Example:
   "RestartBehavior": "suppress"
 }
 ```
-
+### EXE Example:
+```json
+{
+  "Name": "VLC",
+  "DisplayName": "VLC Media Player",
+  "Publisher": "VideoLAN",
+  "Description": "Open source media player.",
+  "InstallerType": "EXE",
+  "SourceUri": "https://downloads.videolan.org/vlc/3.0.23/win64/vlc-3.0.23-win64.exe",
+  "SetupFileName": "vlc-3.0.23-win64.exe",
+  "Architecture": "x64",
+  "InstallCommand": "\"%InstallerPath%\" /S",
+  "UninstallCommand": "\"C:\\Program Files\\VideoLAN\\VLC\\uninstall.exe\" /S",
+  "MinimumSupportedWindowsRelease": "W10_1809",
+  "Category": "Multimedia",
+  "InformationURL": "https://www.videolan.org",
+  "PrivacyURL": "https://www.videolan.org",
+  "AssignmentGroupName": "SG-Intune-App-VLC-Pilot",
+  "InstallExperience": "system",
+  "RestartBehavior": "suppress"
+}
+```
 ### Important Fields
 
 | Field | Description |
@@ -152,11 +173,55 @@ Example:
 | DisplayName | Name displayed in Intune |
 | SourceUri | Installer download location |
 | SetupFileName | Installer filename |
-| InstallerType | Currently supports MSI |
-| InstallArguments | Silent install arguments |
+| InstallerType | Supported values: MSI or EXE |
+| InstallArguments | MSI only. Silent install arguments used with msiexec |
+| InstallCommand | EXE only. Used during testing and publishing |
+| UninstallCommand | EXE only. Used during testing and publishing |
 | AssignmentGroupName | Intune group to receive the application |
 | Architecture | x64, x86, etc. |
 | MinimumSupportedWindowsRelease | Minimum supported Windows version |
+
+---
+## Installer Types
+The Intune App Factory currently supports:
+### MSI Installers
+For MSI packages:
+```json
+{
+  "InstallerType": "MSI",
+  "InstallArguments": "/qn /norestart"
+}
+```
+Requirements:
+- Installer file must be an .msi
+- Silent install arguments should be supplied using **InstallArguments**.
+- Automated testing installs using `msiexec`.
+- Detection uses MSI product code when publishing to Intune.
+
+### EXE Installers
+For executable installers:
+```json
+{
+  "InstallerType": "EXE",
+  "InstallCommand": "\"%InstallerPath%\" /S",
+  "UninstallCommand": "\"C:\\Program Files\\Vendor\\App\\uninstall.exe\" /S"
+}
+```
+Requirements:
+- Installer file must be an `.exe`.
+- Silent install command must be provided.
+- Silent uninstall command must be provided.
+- Detection is performed using the application's `test-detection.ps1` script.
+
+#### %InstallerPath%
+For EXE installers, the token `%InstallerPath%` is automatically replaced during testing and publishing with the actual installer executable.
+Example:
+```json
+{
+  "InstallCommand": "\"%InstallerPath%\" /S"
+}
+```
+becomes `"vlc-3.0.23-win64.exe" /S` when published to Intune.
 
 ---
 
@@ -175,13 +240,11 @@ Use the following value in `app.json`:
 ```
 
 The build process will:
-
 - Authenticate using PnP PowerShell.
 - Retrieve the installer from SharePoint.
 - Match the file using the `SetupFileName` value.
 
 Example:
-
 ```json
 {
   "SourceUri": "https://1svh3d.sharepoint.com/sites/Intune-App-Factory",
@@ -194,14 +257,22 @@ Example:
 Specify a direct download URL.
 
 Example:
-
 ```json
 {
   "SourceUri": "https://github.com/ip7z/7zip/releases/download/26.02/7z2602-x64.msi"
 }
 ```
-
 The build process downloads the installer directly from the URL.
+#### Vendor Download URLs
+
+When using external download URLs, ensure the URL points directly to the installer binary.
+Many vendor websites use redirect pages or download landing pages that may result in HTML content being downloaded instead of the installer.
+
+A good validation method is to verify:
+- The downloaded file size matches the vendor's published installer size.
+- The file executes manually.
+- The automated test phase successfully launches the installer.
+For some vendors, direct binary URLs may need to be obtained using browser developer tools (F12 → Network tab) while initiating the download.
 
 ---
 
@@ -245,18 +316,14 @@ else {
 
 ## Commit Requirements
 
-When adding or modifying an application, the commit message **must** contain:
-
+When adding or modifying an application, the commit message **MUST** contain:
 ```text
 [app:<AppName>]
 ```
-
 Example:
-
 ```text
 Added new application definition [app:7-Zip]
 ```
-
 The workflow uses this value to identify which application should be built and deployed.
 
 ---
@@ -308,22 +375,32 @@ The test process:
 
 The deployment continues only if all tests pass.
 
-### Current Limitation
+### Supported Installer Types
 
-Automated testing currently supports:
+The automated test framework currently supports:
+- MSI installers
+- EXE installers
 
-```json
-"InstallerType": "MSI"
-```
-
-Additional installer types may require updates to the test framework.
+MSI testing:
+1. Installs using `msiexec`.
+2. Validates detection.
+3. Uninstalls using MSI product code.
+4. Validates removal.
+ 
+EXE testing:
+1. Installs using `InstallCommand`.
+2. Validates detection.
+3. Uninstalls using `UninstallCommand`.
+4. Falls back to the registered uninstall string if available.
+5. Validates removal.
+ 
+The deployment workflow continues only if all install, detection, and uninstall validation steps pass.
 
 ---
 
 ## Stage 3 - Production approval
 
-After successful testing,*GitHub pauses the workflow at the production environment approval gate*.
-
+After successful testing,**GitHub pauses the workflow at the production environment approval gate**.
 Deployment cannot proceed until an authorized approver approves the release.
 
 ---
@@ -336,13 +413,13 @@ The publish process:
 3. Updates an existing application if found.
 4. Uploads the latest `.intunewin` package.
 5. Applies application metadata.
-6. Assigns the application to the target deployment group defined in `AssignmentGroupName`.
+6. Creates the appropriate install and uninstall commands.
+7. Configures detection:
+   - MSI product detection for MSI applications
+   - Detection script-based validation for EXE applications
+8. Assigns the application to the target deployment group defined in `AssignmentGroupName`.
 
-Deployment assignment type:
-
-```text
-Required
-```
+Intune Deployment assignment type: `Required`
 
 ---
 
@@ -408,10 +485,9 @@ git add .
 git commit -m "Added 7-Zip package [app:7-Zip]"
 git push origin add-7zip
 ```
-(This can also be done via VSCode GUI if Git module installed. Review SOP for steps)
+(This can also be done via VSCode GUI if Git module is installed. Review SOP for steps)
 
 Then:
-
 1. Open a Pull Request.
 2. Obtain reviewer approval.
 3. Merge to `main`.
