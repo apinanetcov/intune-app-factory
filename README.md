@@ -385,14 +385,14 @@ MSI testing:
 1. Installs using `msiexec`.
 2. Validates detection.
 3. Uninstalls using MSI product code.
-4. Validates removal.
+4. Validates removal.  
  
 EXE testing:
 1. Installs using `InstallCommand`.
 2. Validates detection.
 3. Uninstalls using `UninstallCommand`.
 4. Falls back to the registered uninstall string if available.
-5. Validates removal.
+5. Validates removal.  
  
 The deployment workflow continues only if all install, detection, and uninstall validation steps pass.
 
@@ -400,7 +400,7 @@ The deployment workflow continues only if all install, detection, and uninstall 
 
 ## Stage 3 - Production approval
 
-After successful testing,**GitHub pauses the workflow at the production environment approval gate**.
+After successful testing, **GitHub pauses the workflow at the production environment approval gate**.  
 Deployment cannot proceed until an authorized approver approves the release.
 
 ---
@@ -464,15 +464,11 @@ Upon successful completion:
 - Existing applications are updated automatically.
 - New applications are created automatically.
 - Required deployment assignment is configured.
-- Application is assigned to the group specified in:
-
-```json
-"AssignmentGroupName"
-```
+- Application is assigned to the group specified in: `AssignmentGroupName`  
 
 ---
 
-## Example Contributor Workflow
+# Example Contributor Workflow
 
 ```powershell
 git checkout -b add-7zip
