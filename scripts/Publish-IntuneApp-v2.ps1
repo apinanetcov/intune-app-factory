@@ -67,11 +67,11 @@ switch ($app.InstallerType) {
             throw "EXE app requires test-detection.ps1 in artifact folder."
         }
 
-        if (:IsNullOrWhiteSpace($app.InstallCommand)) {
+        if ([string]::IsNullOrWhiteSpace($app.InstallCommand)) {
             throw "EXE app requires InstallCommand in app.json."
         }
 
-        if (:IsNullOrWhiteSpace($app.UninstallCommand)) {
+        if ([string]::IsNullOrWhiteSpace($app.UninstallCommand)) {
             throw "EXE app requires UninstallCommand in app.json."
         }
 
