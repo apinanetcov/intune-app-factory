@@ -26,10 +26,20 @@ function Get-WingetInstallerUrl {
         Where-Object { $_.name -like "*.installer.yaml" } |
         Select-Object -First 1
 
-    $yaml = Invoke-RestMethod -Uri $installerManifest.download_url
+    $yaml = Invoke-WebRequest -Uri $installerManifest.download_url -UseBasicParsing
 
-    $installerUrl =
-        ($yaml | Select-String "InstallerUrl:").Line.Replace("InstallerUrl:","").Trim()
+    $yamlContent = $yaml.Content
 
+    $installerUrl = ($yamlContent -split "`n" |
+        Where-Object { $_ -match 'InstallerUrl:' } |
+        Select-Object -First 1)
+
+    if (-not $installerUrl) {
+        throw "InstallerUrl not found in manifest: $($installerManifest.download_url)"
+    }
+
+    $installerUrl = ($installerUrl -replace '^.*InstallerUrl:\s*', '').Trim()
+    Write-Host "Found installer URL: $installerUrl"
+    
     return $installerUrl
 }
