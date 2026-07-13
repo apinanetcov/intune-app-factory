@@ -118,21 +118,107 @@ apps/
 
 ---
 
-## app.json
+## App.json Source Options:
+Applications can be configured using either:
+### Option 1 - WinGet Managed (Recommended)
+Provide a WingetPackageId and leave both SourceUri and SetupFileName blank.
 
-Each application must contain an `app.json` file.
+During the build phase, Intune App Factory will:
+- Query the official WinGet manifest repository.
+- Retrieve the latest installer URL.
+- Automatically populate:
+    - SourceUri
+    - SetupFileName
+- Download the installer and continue packaging normally  
+Example:
+```json
+{
+  "Name": "Egnyte",
+  "DisplayName": "Egnyte Desktop App",
+  "Publisher": "Egnyte",
+  "Description": "Egnyte Desktop Application",
+  "InstallerType": "MSI",
+  "WingetPackageId": "Egnyte.EgnyteDesktopApp",
+  "SourceUri": "",
+  "SetupFileName": "",
+  "Architecture": "x64",
+  "InstallArguments": "/qn /norestart",
+  "AssignmentGroupName": "SG-Intune-App-Egnyte-Pilot",
+  "InstallExperience": "system",
+  "RestartBehavior": "suppress"
+}
+```
 
-### MSI Example:
+#### Finding the 'WingetPackageId' 
+Using powershel, use (example):
+```powershell
+winget search Egnyte
+#or
+winget show Egnyte
+```  
+Example Output: 'Found Egnyte Desktop App [Egnyte.EgnyteDesktopApp]'
+The value in the brackets for the 'WingetPackageId' 
+```json
+"WingetPackageId": "Egnyte.EgnyteDesktopApp"
+```
+Benefits
+- No need to manually locate download URLs.
+- Automatically retrieves the latest version published in WinGet.
+- Reduces application maintenance effort.
+- Ensures the latest vendor installer is used during packaging.
 
+### Option 2 - Static Installer Source
+Provide both:
+```json
+{
+    "SourceUri": "",
+    "SetupFileName": "",
+}
+```
+This method should be used when:  
+- A specific version must be deployed.
+- The application is not available in WinGet.
+- Testing or validation requires a fixed installer version.
+- Internal/private installers are used.  
+Example:
 ```json
 {
   "Name": "7-Zip",
   "DisplayName": "7-Zip",
   "Publisher": "7-Zip",
-  "Description": "7-Zip is a file archiver with a high compression ratio.",
   "InstallerType": "MSI",
   "SourceUri": "https://github.com/ip7z/7zip/releases/download/26.02/7z2602-x64.msi",
   "SetupFileName": "7z2602-x64.msi",
+  "Architecture": "x64",
+  "InstallArguments": "/qn /norestart"
+}
+```
+#### Source Selection Rules:
+| Scenario | WingetPackageId | SourceUri | SetupFileName |
+|---------|-------------|
+| Use latest version from WinGet | Required | Leave blank | Leave blank |
+| Deploy a specific version | Not required | Required | Required|
+| Internal SharePoint-hosted package | Not required | Required | Required |
+| Application not available in WinGet | Not required | Required | Required |
+
+**Important**: If WingetPackageId is specified, the build process will automatically populate SourceUri and SetupFileName using the latest WinGet manifest information.
+
+## App.json Templates
+
+Each application must contain an `app.json` file.
+
+### MSI Example (Using WinGet):
+
+```json
+{
+  "Name": "7-Zip",
+  "DisplayName": "7-Zip",
+  "WingetPackageId": "Egnyte.EgnyteDesktopApp", // REQUIRED
+  "Publisher": "7-Zip",
+  "Description": "7-Zip is a file archiver with a high compression ratio.",
+  "InstallerType": "MSI",
+  "SourceUri": "", //leave empty
+  "SetupFileName": "", //leave empty
   "Architecture": "x64",
   "InstallArguments": "/qn /norestart",
   "MinimumSupportedWindowsRelease": "W10_1809",
@@ -144,7 +230,7 @@ Each application must contain an `app.json` file.
   "RestartBehavior": "suppress"
 }
 ```
-### EXE Example:
+### EXE Example (Static Installer):
 ```json
 {
   "Name": "VLC",
@@ -171,6 +257,7 @@ Each application must contain an `app.json` file.
 | Field | Description |
 |---------|-------------|
 | DisplayName | Name displayed in Intune |
+| WingetPackageId | Optional. WinGet package identifier (for example, Egnyte.EgnyteDesktopApp). When specified, Intune App Factory automatically retrieves the installer URL and filename from the WinGet repository. |
 | SourceUri | Installer download location |
 | SetupFileName | Installer filename |
 | InstallerType | Supported values: MSI or EXE |
