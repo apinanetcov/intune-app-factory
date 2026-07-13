@@ -47,6 +47,10 @@ if ($app.PSObject.Properties.Name -contains "WingetPackageId" -and
     $app | ConvertTo-Json -Depth 20 | Set-Content $appJsonPath
 }
 
+Write-Host "WingetPackageId: $($app.WingetPackageId)"
+Write-Host "SourceUri: $($app.SourceUri)"
+Write-Host "SetupFileName: $($app.SetupFileName)"
+
 $sourceFolder = Join-Path $PSScriptRoot "..\build\$AppName\source"
 $outputFolder = Join-Path $PSScriptRoot "..\build\$AppName\output"
 New-Item -ItemType Directory -Path $sourceFolder -Force | Out-Null
