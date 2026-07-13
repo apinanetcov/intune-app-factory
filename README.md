@@ -194,6 +194,7 @@ Example:
 }
 ```
 #### Source Selection Rules:
+
 | Scenario | WingetPackageId | SourceUri | SetupFileName |
 |---------|-------------|
 | Use latest version from WinGet | Required | Leave blank | Leave blank |
