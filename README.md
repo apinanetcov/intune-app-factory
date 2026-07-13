@@ -195,12 +195,12 @@ Example:
 ```
 #### Source Selection Rules:
 
-| Scenario | WingetPackageId | SourceUri | SetupFileName |
-|---------|-------------|
-| Use latest version from WinGet | Required | Leave blank | Leave blank |
-| Deploy a specific version | Not required | Required | Required|
-| Internal SharePoint-hosted package | Not required | Required | Required |
-| Application not available in WinGet | Not required | Required | Required |
+| Scenario | WingetPackageId | SourceUri | SetupFileName |  
+|---------|-------------|  
+| Use latest version from WinGet | Required | Leave blank | Leave blank |  
+| Deploy a specific version | Not required | Required | Required|  
+| Internal SharePoint-hosted package | Not required | Required | Required |  
+| Application not available in WinGet | Not required | Required | Required |  
 
 **Important**: If WingetPackageId is specified, the build process will automatically populate SourceUri and SetupFileName using the latest WinGet manifest information.
 
