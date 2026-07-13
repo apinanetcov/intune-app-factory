@@ -16,6 +16,37 @@ if (-not (Test-Path $appJsonPath)) {
 
 $app = Get-Content $appJsonPath -Raw | ConvertFrom-Json
 
+# Update installer information from WinGet if configured
+if ($app.PSObject.Properties.Name -contains "WingetPackageId" -and
+    -not [string]::IsNullOrWhiteSpace($app.kageId))
+{
+    Write-Host "Retrieving installer information from WinGet..."
+
+    $wingetOutput = winget show $app.WingetPackageId --accept-source-agreements
+
+    $installerUrlLine = $wingetOutput |
+        Select-String "Installer Url"
+
+    if (-not $installerUrlLine) {
+        throw "Unable to find Installer Url for $($app.WingetPackageId)"
+    }
+
+    $installerUrl = $installerUrlLine.ToString().Split(':',2)[1].Trim()
+
+    $setupFileName = [System.IO.Path]::GetFileName(
+        ([System.Uri]$installerUrl).AbsolutePath
+    )
+
+    Write-Host "Installer URL: $installerUrl"
+    Write-Host "Setup File : $setupFileName"
+
+    $app.SourceUri = $installerUrl
+    $app.SetupFileName = $setupFileName
+
+    # Update app.json so future runs have current values
+    $app | ConvertTo-Json -Depth 20 | Set-Content $appJsonPath
+}
+
 $sourceFolder = Join-Path $PSScriptRoot "..\build\$AppName\source"
 $outputFolder = Join-Path $PSScriptRoot "..\build\$AppName\output"
 New-Item -ItemType Directory -Path $sourceFolder -Force | Out-Null
