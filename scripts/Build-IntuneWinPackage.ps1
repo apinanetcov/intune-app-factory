@@ -15,10 +15,10 @@ if (-not (Test-Path $appJsonPath)) {
 }
 
 $app = Get-Content $appJsonPath -Raw | ConvertFrom-Json
-Set-PSDebug -Trace 2
+
 # Update installer information from WinGet if configured
 if ($app.PSObject.Properties.Name -contains "WingetPackageId" -and
-    -not [string]::IsNullOrWhiteSpace($app.kageId))
+    -not [string]::IsNullOrWhiteSpace($app.WingetPackageId))
 {
     Write-Host "Retrieving installer information from WinGet..."
 
@@ -91,7 +91,7 @@ else {
     Invoke-WebRequest -Uri $app.SourceUri -OutFile $setupFilePath -UseBasicParsing
 
 }
-Set-PSDebug -Off
+
 Write-Host "Installing IntuneWin32App module (if needed)"
 if (-not (Get-Module -ListAvailable -Name IntuneWin32App)) {
     Install-Module -Name IntuneWin32App -Force -AcceptLicense -Scope CurrentUser
