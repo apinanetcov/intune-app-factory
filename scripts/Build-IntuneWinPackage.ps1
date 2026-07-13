@@ -5,6 +5,8 @@ param(
     [Parameter(Mandatory)][string]$PnPCertificate
 )
 
+."$PSScriptRoot\Get-WingetInstallerUrl.ps1"
+
 $ErrorActionPreference = "Stop"
 
 $appFolder   = Join-Path $PSScriptRoot "..\apps\$AppName"
@@ -20,7 +22,7 @@ if (-not [string]::IsNullOrWhiteSpace($app.WingetPackageId))
 {
     Write-Host "Looking up installer from WinGet GitHub manifests..."
 
-    $installerUrl = Get-WingetInstallerUrl $app.WingetPackageId
+    $installerUrl = Get-WingetInstallerUrl -PackageId $app.WingetPackageId
 
     $app.SourceUri = $installerUrl
     $app.SetupFileName = Split-Path $installerUrl -Leaf
