@@ -22,7 +22,16 @@ if ($app.PSObject.Properties.Name -contains "WingetPackageId" -and
 {
     Write-Host "Retrieving installer information from WinGet..."
 
-    $wingetOutput = & winget show $app.WingetPackageId --accept-source-agreements 2>&1
+    #$wingetOutput = & winget show $app.WingetPackageId --accept-source-agreements 2>&1
+    $tempFile = Join-Path $env:TEMP "winget-output.txt"
+
+    cmd.exe /c "winget show $($app.WingetPackageId) --accept-source-agreements > ""$tempFile"""
+
+    $wingetOutput = Get-Content $tempFile
+
+    Write-Host "===== WINGET OUTPUT ====="
+    $wingetOutput
+    Write-Host "========================="
 
     $installerUrlLine = $wingetOutput |
         Select-String "Installer Url"
