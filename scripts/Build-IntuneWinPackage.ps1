@@ -15,7 +15,7 @@ if (-not (Test-Path $appJsonPath)) {
 }
 
 $app = Get-Content $appJsonPath -Raw | ConvertFrom-Json
-
+Set-PSDebug -Trace 1
 # Update installer information from WinGet if configured
 if ($app.PSObject.Properties.Name -contains "WingetPackageId" -and
     -not [string]::IsNullOrWhiteSpace($app.kageId))
