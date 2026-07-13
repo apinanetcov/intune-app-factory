@@ -1,6 +1,7 @@
 {
   "Name": "Egnyte",
   "DisplayName": "Egnyte Desktop App",
+  "WingetPackageId": "Egnyte.EgnyteDesktopApp",
   "Publisher": "Egnyte",
   "Description": "Egnyte Desktop application for file sync and sharing.",
   "InstallerType": "MSI",
