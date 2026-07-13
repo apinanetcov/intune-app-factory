@@ -16,52 +16,18 @@ if (-not (Test-Path $appJsonPath)) {
 
 $app = Get-Content $appJsonPath -Raw | ConvertFrom-Json
 
-Write-Host "Current user: $env:USERNAME"
-
-Get-Command winget -ErrorAction SilentlyContinue
-
-where.exe winget
-
-winget --version
-
-
-# Update installer information from WinGet if configured
-if ($app.PSObject.Properties.Name -contains "WingetPackageId" -and
-    -not [string]::IsNullOrWhiteSpace($app.WingetPackageId))
+if (-not [string]::IsNullOrWhiteSpace($app.WingetPackageId))
 {
-    Write-Host "Retrieving installer information from WinGet..."
+    Write-Host "Looking up installer from WinGet GitHub manifests..."
 
-    #$wingetOutput = & winget show $app.WingetPackageId --accept-source-agreements 2>&1
-    $tempFile = Join-Path $env:TEMP "winget-output.txt"
-
-    cmd.exe /c "winget show $($app.WingetPackageId) --accept-source-agreements > ""$tempFile"""
-
-    $wingetOutput = Get-Content $tempFile
-
-    Write-Host "===== WINGET OUTPUT ====="
-    $wingetOutput
-    Write-Host "========================="
-
-    $installerUrlLine = $wingetOutput |
-        Select-String "Installer Url"
-
-    if (-not $installerUrlLine) {
-        throw "Unable to find Installer Url for $($app.WingetPackageId)"
-    }
-
-    $installerUrl = $installerUrlLine.ToString().Split(':',2)[1].Trim()
-
-    $setupFileName = [System.IO.Path]::GetFileName(
-        ([System.Uri]$installerUrl).AbsolutePath
-    )
-
-    Write-Host "Installer URL: $installerUrl"
-    Write-Host "Setup File : $setupFileName"
+    $installerUrl = Get-WingetInstallerUrl $app.WingetPackageId
 
     $app.SourceUri = $installerUrl
-    $app.SetupFileName = $setupFileName
+    $app.SetupFileName = Split-Path $installerUrl -Leaf
 
-    # Update app.json so future runs have current values
+    Write-Host "Installer URL: $installerUrl"
+    Write-Host "Setup File: $($app.SetupFileName)"
+
     $app | ConvertTo-Json -Depth 20 | Set-Content $appJsonPath
 }
 
