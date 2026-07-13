@@ -16,6 +16,15 @@ if (-not (Test-Path $appJsonPath)) {
 
 $app = Get-Content $appJsonPath -Raw | ConvertFrom-Json
 
+Write-Host "Current user: $env:USERNAME"
+
+Get-Command winget -ErrorAction SilentlyContinue
+
+where.exe winget
+
+winget --version
+
+
 # Update installer information from WinGet if configured
 if ($app.PSObject.Properties.Name -contains "WingetPackageId" -and
     -not [string]::IsNullOrWhiteSpace($app.WingetPackageId))
