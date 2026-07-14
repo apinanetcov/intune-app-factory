@@ -11,6 +11,7 @@ The repository uses GitHub Actions to automate the complete application lifecycl
 3. Require manual approval before production deployment.
 4. Upload the application to Microsoft Intune.
 5. Assign the application to a pre-defined Entra ID / Intune group.
+6. Automatically monitor WinGet-managed applications for new versions
 
 This approach ensures all applications are validated before being made available to users and provides a consistent deployment experience across the organization.
 
@@ -63,6 +64,38 @@ Publish to Intune
     |
     v
 Assign to Deployment Group
+
+
+WEEKLY WINGET UPDATE PROCESS:
+
+Scheduled Workflow
+    |
+    v
+Check WinGet Managed Apps
+    |
+    v
+New Version Found
+    |
+    v
+Create Branch
+    |
+    v
+Create Pull Request
+    |
+    v
+Review & Merge
+    |
+    v
+Build Package
+    |
+    v
+Test Install / Detection
+    |
+    v
+Production Approval
+    |
+    v
+Publish to Intune
 ```
 
 ---
@@ -121,9 +154,9 @@ apps/
 ## App.json Source Options:
 Applications can be configured using either:
 ### Option 1 - WinGet Managed (Recommended)
-Provide a WingetPackageId and leave both SourceUri and SetupFileName blank.
+Provide a WingetPackageId and leave both `SourceUri` and `SetupFileName` blank.
 
-During the build phase, Intune App Factory will:
+During the build process, Intune App Factory will:
 - Query the official WinGet manifest repository.
 - Retrieve the latest installer URL.
 - Automatically populate:
@@ -297,6 +330,79 @@ Example:
 | MinimumSupportedWindowsRelease | Minimum supported Windows version |
 
 ---
+
+## Automatic WinGet Updates
+
+Applications configured with a `WingetPackageId` are automatically checked for updates once per week.
+
+### Update Process
+
+```text
+Scheduled Workflow
+        ↓
+Check WinGet Repository
+        ↓
+New Version Available?
+        ↓
+       Yes
+        ↓
+Update app.json
+        ↓
+Create Branch
+        ↓
+Create Pull Request
+        ↓
+Engineering Review
+        ↓
+Merge Pull Request
+        ↓
+Build Package
+        ↓
+Test Installation
+        ↓
+Production Approval
+        ↓
+Publish to Intune
+```
+
+### What Gets Updated
+
+When a newer installer version is detected, the automation updates:
+
+```json
+{
+  "SourceUri": "",
+  "SetupFileName": ""
+}
+```
+
+using the latest installer information from the WinGet repository.
+
+### Pull Request Creation
+
+The weekly update process does not push directly to the `main` branch.
+
+Instead it:
+
+1. Creates a new branch.
+2. Updates the affected application definitions.
+3. Creates a Pull Request.
+4. Waits for normal engineering review and approval.
+
+After the Pull Request is merged, the standard Intune App Factory deployment workflow automatically begins.
+
+### Applications Excluded from Automatic Updates
+
+Applications are not automatically updated when:
+
+- `WingetPackageId` is not specified.
+- The application uses a manually managed `SourceUri`.
+- The application uses a SharePoint-hosted installer.
+- The application version is intentionally pinned.
+
+These applications continue to follow the normal manual update process.
+---
+
 ## Installer Types
 The Intune App Factory currently supports:
 ### MSI Installers
