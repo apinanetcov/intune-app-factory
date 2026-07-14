@@ -96,7 +96,13 @@ if ($changesMade) {
     Write-Host "Changes detected. Committing updates..."
 
     git config user.name "Intune App Factory Bot"
-    git config user.email "intune-app-factory@company.com"
+    git config user.email "intune-app-factory@netcov.com"
+
+    $branchDate = Get-Date -Format "yyyyMMdd-HHmm"
+
+    $branchName = "winget-update-$branchDate"
+
+    git checkout -b $branchName
 
     git add apps
 
@@ -115,7 +121,13 @@ if ($changesMade) {
 
     git commit -m $commitMessage
 
-    git push
+    git push origin $branchName
+
+    "BRANCH_NAME=$branchName" |
+        Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    "UPDATED_APPS=$($updatedApps -join ',')" |
+        Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
 }
 else {
