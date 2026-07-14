@@ -1,0 +1,26 @@
+name: Winget Update Check
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: '0 2 * * 0'
+
+permissions:
+  contents: write
+
+jobs:
+
+  winget-update-check:
+
+    runs-on: [self-hosted, windows, intune-test]
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Winget Update Check
+        shell: pwsh
+        run: |
+          ./scripts/Update-WingetApps.ps1
