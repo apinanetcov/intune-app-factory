@@ -50,7 +50,7 @@ jobs:
                   $appName = $apps[0]
               }
               elseif ($apps.Count -gt 1) {
-                  Write-Error "Multiple applications modified in one commit: $($apps -join ', ')""
+                  Write-Error "Multiple applications modified in one commit: $($apps -join ', ')"
               }
           }
           if (-not $appName) {
