@@ -57,7 +57,7 @@ jobs:
               Write-Error "App name not provided. Use workflow_dispatch input or commit message [app:AppName]"
           }
           Write-Host "Using app name: $appName"
-          "app_name=$appName" >> $env:GITHUB_OUTPUT
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "app_name=$appName"
 
       - name: Build package
         shell: pwsh
