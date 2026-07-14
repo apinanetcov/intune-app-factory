@@ -17,7 +17,7 @@ Get-ChildItem "$repoRoot\apps" -Directory | ForEach-Object {
 
         $app = Get-Content $appJsonPath -Raw | ConvertFrom-Json
 
-        if (:IsNullOrWhiteSpace($app.WingetPackageId)) {
+        if ([string]::IsNullOrWhiteSpace($app.WingetPackageId)) {
 
             Write-Host "Skipping $($_.Name) - not WinGet managed"
             return
@@ -30,7 +30,7 @@ Get-ChildItem "$repoRoot\apps" -Directory | ForEach-Object {
         $latestInstallerUrl =
             Get-WingetInstallerUrl -PackageId $app.WingetPackageId
 
-        if (:IsNullOrWhiteSpace($latestInstallerUrl)) {
+        if ([string]::IsNullOrWhiteSpace($latestInstallerUrl)) {
 
             Write-Warning "Unable to retrieve installer URL for $($app.WingetPackageId)"
             return
@@ -41,7 +41,7 @@ Get-ChildItem "$repoRoot\apps" -Directory | ForEach-Object {
             Split-Path $latestInstallerUrl -Leaf
 
         # Initial population
-        if (:IsNullOrWhiteSpace($app.SourceUri)) {
+        if ([string]::IsNullOrWhiteSpace($app.SourceUri)) {
 
             Write-Host "SourceUri is blank - populating from WinGet"
 
