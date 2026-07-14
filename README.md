@@ -150,7 +150,7 @@ Example:
 ```
 
 #### Finding the 'WingetPackageId' 
-Using powershel, use (example):
+Using powershell, use (example):
 ```powershell
 winget search Egnyte
 #or
@@ -167,7 +167,7 @@ Benefits
 - Reduces application maintenance effort.
 - Ensures the latest vendor installer is used during packaging.
 
-### Option 2 - Static Installer Source
+### Option 2 - Static Installer Source (Vendor or Sharepoint Hosted)
 Provide both:
 ```json
 {
@@ -195,14 +195,14 @@ Example:
 ```
 #### Source Selection Rules:
 
-| Scenario | WingetPackageId | SourceUri | SetupFileName |  
-|---------|-------------|  
-| Use latest version from WinGet | Required | Leave blank | Leave blank |  
-| Deploy a specific version | Not required | Required | Required|  
-| Internal SharePoint-hosted package | Not required | Required | Required |  
-| Application not available in WinGet | Not required | Required | Required |  
-
-**Important**: If WingetPackageId is specified, the build process will automatically populate SourceUri and SetupFileName using the latest WinGet manifest information.
+| Scenario | WingetPackageId | SourceUri | SetupFileName |
+|-----------|----------------|-----------|---------------|
+| Use latest version from WinGet | Required | Leave blank | Leave blank |
+| Deploy a specific vendor version | Not required | Required | Required |
+| Internal SharePoint-hosted installer | Not required | Required | Required |
+| Application not available in WinGet | Not required | Required | Required |
+ 
+**Important:** If `WingetPackageId` is specified, the build process automatically retrieves the latest installer URL and filename from the WinGet repository and populates the `SourceUri` and `SetupFileName` values during the build stage.
 
 ## App.json Templates
 
@@ -231,7 +231,7 @@ Each application must contain an `app.json` file.
   "RestartBehavior": "suppress"
 }
 ```
-### EXE Example (Static Installer):
+### EXE Example (Static Installer & Vendor Url):
 ```json
 {
   "Name": "VLC",
@@ -251,6 +251,32 @@ Each application must contain an `app.json` file.
   "AssignmentGroupName": "SG-Intune-App-VLC-Pilot",
   "InstallExperience": "system",
   "RestartBehavior": "suppress"
+}
+```
+Vendor Download URLs
+When using external download URLs, ensure the URL points directly to the installer binary. Many vendor websites use redirect pages or download landing pages that may result in HTML content being downloaded instead of the installer.
+
+A good validation method is to verify:
+- The downloaded file size matches the vendor's published installer size.
+- The file executes manually.
+- The automated test phase successfully launches the installer. For some vendors, direct binary URLs may need to be obtained using browser developer tools (F12 → Network tab) while initiating the download.  
+
+### Sharepoint Hosted Installer (Exe or MSI):
+Upload the installer to the Intune App Factory SharePoint site.
+Use the following value in app.json:
+```json
+"SourceUri": "https://1svh3d.sharepoint.com/sites/Intune-App-Factory"
+```
+The build process will:
+- Authenticate using PnP PowerShell.
+- Retrieve the installer from SharePoint.
+- Match the file using the SetupFileName value.  
+
+Example:
+```json
+{
+  "SourceUri": "https://1svh3d.sharepoint.com/sites/Intune-App-Factory",
+  "SetupFileName": "7z2602-x64.msi"
 }
 ```
 ### Important Fields
@@ -313,57 +339,6 @@ becomes `"vlc-3.0.23-win64.exe" /S` when published to Intune.
 
 ---
 
-## Installer Sources
-
-Two installer source methods are supported.
-
-### Option 1: SharePoint Hosted Installer
-
-Upload the installer to the Intune App Factory SharePoint site.
-
-Use the following value in `app.json`:
-
-```json
-"SourceUri": "https://1svh3d.sharepoint.com/sites/Intune-App-Factory"
-```
-
-The build process will:
-- Authenticate using PnP PowerShell.
-- Retrieve the installer from SharePoint.
-- Match the file using the `SetupFileName` value.
-
-Example:
-```json
-{
-  "SourceUri": "https://1svh3d.sharepoint.com/sites/Intune-App-Factory",
-  "SetupFileName": "7z2602-x64.msi"
-}
-```
-
-### Option 2: External Download URL
-
-Specify a direct download URL.
-
-Example:
-```json
-{
-  "SourceUri": "https://github.com/ip7z/7zip/releases/download/26.02/7z2602-x64.msi"
-}
-```
-The build process downloads the installer directly from the URL.
-#### Vendor Download URLs
-
-When using external download URLs, ensure the URL points directly to the installer binary.
-Many vendor websites use redirect pages or download landing pages that may result in HTML content being downloaded instead of the installer.
-
-A good validation method is to verify:
-- The downloaded file size matches the vendor's published installer size.
-- The file executes manually.
-- The automated test phase successfully launches the installer.
-For some vendors, direct binary URLs may need to be obtained using browser developer tools (F12 → Network tab) while initiating the download.
-
----
-
 ## Detection Script
 
 Each application must include a detection script named:
@@ -402,7 +377,7 @@ else {
 
 ---
 
-## Commit Requirements
+# Commit Requirements
 
 When adding or modifying an application, the commit message **MUST** contain:
 ```text
@@ -418,10 +393,10 @@ The workflow uses this value to identify which application should be built and d
 
 ## Pull Request Process
 
-1. Push your feature branch.
-2. Create a Pull Request.
+1. Push your feature branch. `git push origin <name of branch>`
+2. Create a Pull Request. (via VSCode or GitHub)
 3. Obtain approval from at least one reviewer.
-4. Merge into `main`.
+4. Merge into `main` branch once approved.
 
 A merge to `main` triggers the deployment workflow.
 ---
@@ -459,29 +434,8 @@ The test process:
 3. Verifies the application is detected.
 4. Uninstalls the application.
 5. Executes `test-detection.ps1` again.
-6. Verifies the application is no longer detected.
+6. Verifies the application is no longer detected.  
 
-The deployment continues only if all tests pass.
-
-### Supported Installer Types
-
-The automated test framework currently supports:
-- MSI installers
-- EXE installers
-
-MSI testing:
-1. Installs using `msiexec`.
-2. Validates detection.
-3. Uninstalls using MSI product code.
-4. Validates removal.  
- 
-EXE testing:
-1. Installs using `InstallCommand`.
-2. Validates detection.
-3. Uninstalls using `UninstallCommand`.
-4. Falls back to the registered uninstall string if available.
-5. Validates removal.  
- 
 The deployment workflow continues only if all install, detection, and uninstall validation steps pass.
 
 ---
@@ -559,12 +513,15 @@ Upon successful completion:
 # Example Contributor Workflow
 
 ```powershell
+#creat the working branch
 git checkout -b add-7zip
 
-# Create:
+# Create these folders and files in the repo:
 # apps/7-Zip/app.json
 # apps/7-Zip/test-detection.ps1
+# Do this manually or via pwsh commands
 
+# Once all changes have been made and files have been added:
 git add .
 git commit -m "Added 7-Zip package [app:7-Zip]"
 git push origin add-7zip
