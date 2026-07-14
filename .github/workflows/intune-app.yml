@@ -43,7 +43,7 @@ jobs:
               $changedFiles = git diff-tree --no-commit-id --name-only -r $env:GITHUB_SHA
               $apps = $changedFiles |
                   Where-Object { $_ -like 'apps/*' } |
-                  ForEach-Object {$_ -split '/')[1]} |
+                  ForEach-Object {($_ -split '/')[1]} |
                   Select-Object -Unique
 
               if ($apps.Count -eq 1) {
