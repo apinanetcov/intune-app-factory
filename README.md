@@ -200,8 +200,9 @@ Example:
 | Use latest version from WinGet | Required | Leave blank | Leave blank |
 | Deploy a specific vendor version | Not required | Required | Required |
 | Internal SharePoint-hosted installer | Not required | Required | Required |
-| Application not available in WinGet | Not required | Required | Required |
- 
+| Application not available in WinGet | Not required | Required | Required |  
+
+
 **Important:** If `WingetPackageId` is specified, the build process automatically retrieves the latest installer URL and filename from the WinGet repository and populates the `SourceUri` and `SetupFileName` values during the build stage.
 
 ## App.json Templates
