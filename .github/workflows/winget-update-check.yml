@@ -12,7 +12,8 @@ permissions:
 jobs:
 
   winget-update-check:
-
+    if: github.actor != 'github-actions[bot]'
+    
     runs-on: [self-hosted, windows, intune-test]
 
     steps:
