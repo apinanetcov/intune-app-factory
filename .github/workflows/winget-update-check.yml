@@ -20,6 +20,13 @@ jobs:
 
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Verify Git
+        shell: pwsh
+        run: |
+            git --version
 
       - name: Run Winget Update Check
         shell: pwsh
