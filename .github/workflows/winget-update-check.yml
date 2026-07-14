@@ -43,7 +43,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_BOT_TOKEN }}
         run: |
-          $title = "Automated WinGet Updates"
+          $appTags = $env:UPDATED_APPS -replace ',', '] [app:'
+          $title = "Automated WinGet Updates [app:$appTags]"
           $body = @"
           The following applications were updated automatically:
           
