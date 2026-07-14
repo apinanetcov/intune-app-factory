@@ -246,45 +246,45 @@ Each application must contain an `app.json` file.
 
 ```json
 {
-  "Name": "7-Zip",
-  "DisplayName": "7-Zip",
+  "Name": "7-Zip", // REQUIRED
+  "DisplayName": "7-Zip", // REQUIRED
   "WingetPackageId": "Egnyte.EgnyteDesktopApp", // REQUIRED
-  "Publisher": "7-Zip",
+  "Publisher": "7-Zip", // REQUIRED
   "Description": "7-Zip is a file archiver with a high compression ratio.",
-  "InstallerType": "MSI",
+  "InstallerType": "MSI", // REQUIRED -- cannot be empty!
   "SourceUri": "", //leave empty
   "SetupFileName": "", //leave empty
-  "Architecture": "x64",
-  "InstallArguments": "/qn /norestart",
-  "MinimumSupportedWindowsRelease": "W10_1809",
+  "Architecture": "x64", // REQUIRED
+  "InstallArguments": "/qn /norestart", // REQUIRED
+  "MinimumSupportedWindowsRelease": "W10_1809", // REQUIRED
   "Category": "Productivity",
   "InformationURL": "https://www.7-zip.org",
   "PrivacyURL": "https://www.7-zip.org",
-  "AssignmentGroupName": "SG-Intune-App-7-Zip-Pilot",
-  "InstallExperience": "system",
-  "RestartBehavior": "suppress"
+  "AssignmentGroupName": "SG-Intune-App-7-Zip-Pilot", // REQUIRED
+  "InstallExperience": "system", // REQUIRED
+  "RestartBehavior": "suppress" // REQUIRED
 }
 ```
 ### EXE Example (Static Installer & Vendor Url):
 ```json
 {
-  "Name": "VLC",
-  "DisplayName": "VLC Media Player",
-  "Publisher": "VideoLAN",
+  "Name": "VLC", // REQUIRED
+  "DisplayName": "VLC Media Player", // REQUIRED
+  "Publisher": "VideoLAN", // REQUIRED
   "Description": "Open source media player.",
-  "InstallerType": "EXE",
-  "SourceUri": "https://downloads.videolan.org/vlc/3.0.23/win64/vlc-3.0.23-win64.exe",
-  "SetupFileName": "vlc-3.0.23-win64.exe",
-  "Architecture": "x64",
-  "InstallCommand": "\"%InstallerPath%\" /S",
-  "UninstallCommand": "\"C:\\Program Files\\VideoLAN\\VLC\\uninstall.exe\" /S",
-  "MinimumSupportedWindowsRelease": "W10_1809",
+  "InstallerType": "EXE", // REQUIRED -- cannot be empty!
+  "SourceUri": "https://downloads.videolan.org/vlc/3.0.23/win64/vlc-3.0.23-win64.exe", // REQUIRED
+  "SetupFileName": "vlc-3.0.23-win64.exe", // REQUIRED
+  "Architecture": "x64", // REQUIRED
+  "InstallCommand": "\"%InstallerPath%\" /S", // REQUIRED
+  "UninstallCommand": "\"C:\\Program Files\\VideoLAN\\VLC\\uninstall.exe\" /S", // REQUIRED
+  "MinimumSupportedWindowsRelease": "W10_1809", // REQUIRED
   "Category": "Multimedia",
   "InformationURL": "https://www.videolan.org",
   "PrivacyURL": "https://www.videolan.org",
-  "AssignmentGroupName": "SG-Intune-App-VLC-Pilot",
-  "InstallExperience": "system",
-  "RestartBehavior": "suppress"
+  "AssignmentGroupName": "SG-Intune-App-VLC-Pilot", // REQUIRED
+  "InstallExperience": "system", // REQUIRED
+  "RestartBehavior": "suppress" // REQUIRED
 }
 ```
 Vendor Download URLs
