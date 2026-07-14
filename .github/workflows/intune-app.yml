@@ -40,7 +40,10 @@ jobs:
           if (-not $appName)
           {
               Write-Host "Attempting to determine app from changed files..."
+              Write-Host "GITHUB_SHA: $env:GITHUB_SHA"
               $changedFiles = git diff-tree --no-commit-id --name-only -r $env:GITHUB_SHA
+              Write-Host "Changed files:"
+              $changedFiles
               $apps = $changedFiles |
                   Where-Object { $_ -like 'apps/*' } |
                   ForEach-Object {($_ -split '/')[1]} |
