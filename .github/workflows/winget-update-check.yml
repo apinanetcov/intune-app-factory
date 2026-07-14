@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
 
@@ -22,7 +23,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+          token: ${{ secrets.REPO_BOT_TOKEN }}
+
       - name: Verify Git
         shell: pwsh
         run: |
@@ -30,5 +32,24 @@ jobs:
 
       - name: Run Winget Update Check
         shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_BOT_TOKEN }}
         run: |
           ./scripts/Update-WingetApps.ps1
+
+      - name: Create Pull Request
+        if: env.BRANCH_NAME != ''
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_BOT_TOKEN }}
+        run: |
+          $title = "Automated WinGet Updates"
+          $body = @"
+          The following applications were updated automatically:
+          
+          $env:UPDATED_APPS
+
+          Genereated by Intune App Factory WinGet Update Check.
+          "@
+          
+          gh pr create --base main --head $env:BRANCH_NAME --title "$title" --body "$body"
