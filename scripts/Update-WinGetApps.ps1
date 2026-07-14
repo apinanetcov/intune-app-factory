@@ -100,6 +100,13 @@ if ($changesMade) {
 
     git add apps
 
+    $status = git diff --cached --name-only
+
+    if (-not $status) {
+        Write-Host "No staged changes detected."
+        exit 0
+    }
+
     $appTags = $updatedApps | ForEach-Object {
         "[app:$_]"
     }
