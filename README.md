@@ -1,5 +1,5 @@
 # Intune App Factory - NetCov Infrastructure Team
-
+![Version](https://img.shields.io/badge/version-v1.
 ## Overview
 
 Intune App Factory provides a standardized process for packaging, validating, and deploying Win32 applications to Microsoft Intune.
