@@ -9,7 +9,7 @@
   "SetupFileName": "",
   "Architecture": "x64",
   "InstallCommand": "\"%InstallerPath%\" install --quiet --accept-license --always-run-service",
-  "UninstallCommand": "C:\\Program Files\\Docker\\Docker\\Docker Desktop Installer.exe uninstall",
+  "UninstallCommand": "\"C:\\Program Files\\Docker\\Docker\\Docker Desktop Installer.exe\" \"uninstall\"",
   "MinimumSupportedWindowsRelease": "W10_1809",
   "Category": "Productivity",
   "InformationURL": "https://www.docker.com/",
