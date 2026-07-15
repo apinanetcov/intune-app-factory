@@ -10,6 +10,7 @@ function Get-WingetInstallerUrl {
     $apiPath = "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/$firstLetter/$($packageParts -join '/')"
 
     $versions = Invoke-RestMethod -Uri $apiPath
+    Write-Host "Versions API: $apiPath"
 
     $latestVersion =
         $versions |
@@ -19,6 +20,9 @@ function Get-WingetInstallerUrl {
     $manifestApi =
         "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/$firstLetter/$($packageParts -join '/')/$($latestVersion.name)"
 
+    Write-Host "Latest version: $($latestVersion.name)"
+    Write-Host "Version manifest API: $manifestApi"
+    
     $files = Invoke-RestMethod -Uri $manifestApi
     Write-Host "Manifest API: $manifestApi"
     Write-Host "Returned files:"
