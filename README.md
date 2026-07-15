@@ -246,21 +246,21 @@ Each application must contain an `app.json` file.
 
 ```json
 {
-  "Name": "7-Zip", // REQUIRED
-  "DisplayName": "7-Zip", // REQUIRED
+  "Name": "Egnyte", // REQUIRED
+  "DisplayName": "Egnyte Desktop App", // REQUIRED
   "WingetPackageId": "Egnyte.EgnyteDesktopApp", // REQUIRED
-  "Publisher": "7-Zip", // REQUIRED
-  "Description": "7-Zip is a file archiver with a high compression ratio.",
+  "Publisher": "Egnyte", // REQUIRED
+  "Description": "Egnyte Desktop application for file sync and sharing.",
   "InstallerType": "MSI", // REQUIRED -- cannot be empty!
   "SourceUri": "", //leave empty
   "SetupFileName": "", //leave empty
   "Architecture": "x64", // REQUIRED
-  "InstallArguments": "/qn /norestart", // REQUIRED
+  "InstallArguments": "/qn ED_UPDATE_ON_BOOT=1", // REQUIRED
   "MinimumSupportedWindowsRelease": "W10_1809", // REQUIRED
   "Category": "Productivity",
-  "InformationURL": "https://www.7-zip.org",
-  "PrivacyURL": "https://www.7-zip.org",
-  "AssignmentGroupName": "SG-Intune-App-7-Zip-Pilot", // REQUIRED
+  "InformationURL": "https://www.egnyte.com",
+  "PrivacyURL": "https://www.egnyte.com/privacy",
+  "AssignmentGroupName": "SG-Intune-App-Egnyte-Pilot", // REQUIRED
   "InstallExperience": "system", // REQUIRED
   "RestartBehavior": "suppress" // REQUIRED
 }
