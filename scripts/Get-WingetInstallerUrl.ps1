@@ -12,9 +12,20 @@ function Get-WingetInstallerUrl {
     $versions = Invoke-RestMethod -Uri $apiPath
     Write-Host "Versions API: $apiPath"
 
-    $latestVersion =
+    $versionFolders =
         $versions |
-        Sort-Object Name -Descending |
+        Where-Object {
+            $_.type -eq 'dir' -and
+            $_.name -match '^\d+(\.\d+)+$'
+        }
+
+    if (-not $versionFolders) {
+        throw "No version folders found for package $PackageId"
+    }
+
+    $latestVersion =
+        $versionFolders |
+        Sort-Object { [version]$_.name } -Descending |
         Select-Object -First 1
 
     $manifestApi =
