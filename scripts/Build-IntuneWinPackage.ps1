@@ -27,7 +27,8 @@ if (-not [string]::IsNullOrWhiteSpace($app.WingetPackageId))
     Write-Host "InstallerURL returned: '$installerUrl'"
 
     $app.SourceUri = $installerUrl
-    $app.SetupFileName = Split-Path $installerUrl -Leaf
+    $uri = [System.Uri]$installerUrl
+    $app.SetupFileName = [System.IO.Path]::GetFileName($uri.AbsolutePath)
 
     Write-Host "Installer URL: $installerUrl"
     Write-Host "Setup File: $($app.SetupFileName)"
