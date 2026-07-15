@@ -23,6 +23,7 @@ if (-not [string]::IsNullOrWhiteSpace($app.WingetPackageId))
     Write-Host "Looking up installer from WinGet GitHub manifests..."
 
     $installerUrl = Get-WingetInstallerUrl -PackageId $app.WingetPackageId
+    Write-Host "InstallerURL returned: '$installerUrl'"
 
     $app.SourceUri = $installerUrl
     $app.SetupFileName = Split-Path $installerUrl -Leaf
