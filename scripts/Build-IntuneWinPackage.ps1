@@ -17,6 +17,7 @@ if (-not (Test-Path $appJsonPath)) {
 }
 
 $app = Get-Content $appJsonPath -Raw | ConvertFrom-Json
+Write-Host "WingetPackageId from JSON: $($app.WingetPackageId)"
 
 if (-not [string]::IsNullOrWhiteSpace($app.WingetPackageId))
 {
