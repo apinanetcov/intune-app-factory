@@ -20,11 +20,21 @@ function Get-WingetInstallerUrl {
         "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/$firstLetter/$($packageParts -join '/')/$($latestVersion.name)"
 
     $files = Invoke-RestMethod -Uri $manifestApi
+    Write-Host "Manifest API: $manifestApi"
+    Write-Host "Returned files:"
+    $files | ForEach-Object { Write-Host $_.name }
 
     $installerManifest =
         $files |
-        Where-Object { $_.name -like "*.installer.yaml" } |
+        Where-Object {
+            $_.name -match '\.installer\.yaml$'
+        } |
         Select-Object -First 1
+
+    if (-not $installerManifest)
+    {
+        throw "No installer manifest found in $manifestApi"
+    }
 
     $yaml = Invoke-WebRequest -Uri $installerManifest.download_url -UseBasicParsing
 
