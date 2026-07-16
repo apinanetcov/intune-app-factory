@@ -466,19 +466,17 @@ The script must:
 Example:
 
 ```powershell
-$app = Get-ItemProperty `
-    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", `
-    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" `
-    -ErrorAction Sil*ntlyContinue |
-    Where-Object { *_.DisplayName*-like "7-Zip*" }
+$app = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", `
+                         "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" `
+    -ErrorAction SilentlyContinue |
+    Where-Object { $_.DisplayName -like "*<appName>*" }
 
 if ($app) {
-    *rite-Output "DETECTED: $($app.Disp*ayName)"
+    Write-Output "DETECTED: $($app.DisplayName) $($app.DisplayVersion)"
     exit 0
-}
-else {
-    W*ite-Output "NOT DETECTED"
-    exit*1
+} else {
+    Write-Output "NOT DETECTED"
+    exit 1
 }
 ```
 
